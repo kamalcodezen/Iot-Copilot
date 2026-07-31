@@ -1,0 +1,38 @@
+{
+  "name": "iot-copilot-client",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^3.9.1",
+    "better-auth": "^1.6.25",
+    "clsx": "^2.1.1",
+    "framer-motion": "^11.15.0",
+    "lucide-react": "^0.468.0",
+    "next": "^16.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.54.1",
+    "react-hot-toast": "^2.4.1",
+    "recharts": "^2.15.0",
+    "tailwind-merge": "^2.6.0",
+    "typescript": "^5.7.2",
+    "zod": "^3.24.1",
+    "zustand": "^5.0.2"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.0",
+    "@tailwindcss/postcss": "^4.0.0",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.2",
+    "playwright": "^1.62.0",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^4.0.0"
+  }
+}
