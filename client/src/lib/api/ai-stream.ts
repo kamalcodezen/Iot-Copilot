@@ -33,12 +33,17 @@ export const streamChat = async (message: string, onToken: (token: string) => vo
 
     for (const line of lines) {
       if (line.startsWith('data: ')) {
+        let data: any;
         try {
-          const data = JSON.parse(line.slice(6));
-          if (data.token) {
-            onToken(data.token);
-          }
-        } catch {}
+          data = JSON.parse(line.slice(6));
+        } catch { continue; }
+        
+        if (data.error) {
+          throw new Error(data.error);
+        }
+        if (data.token) {
+          onToken(data.token);
+        }
       }
     }
   }
@@ -140,10 +145,17 @@ export const streamDebug = async (
 
     for (const line of lines) {
       if (line.startsWith('data: ')) {
+        let data: any;
         try {
-          const data = JSON.parse(line.slice(6));
-          if (data.token) onToken(data.token);
-        } catch {}
+          data = JSON.parse(line.slice(6));
+        } catch { continue; }
+        
+        if (data.error) {
+          throw new Error(data.error);
+        }
+        if (data.token) {
+          onToken(data.token);
+        }
       }
     }
   }

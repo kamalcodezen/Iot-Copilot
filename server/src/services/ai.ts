@@ -244,13 +244,35 @@ function getGenAI(): GoogleGenAI {
 
 const GEMINI_CONFIG = { maxOutputTokens: 4096 };
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const withRetry = async <T>(operation: () => Promise<T>, maxRetries = 3): Promise<T> => {
+  let lastError;
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await operation();
+    } catch (error: any) {
+      lastError = error;
+      const raw = error instanceof Error ? error.message : String(error);
+      const isRetryable = /429|503|RESOURCE_EXHAUSTED|UNAVAILABLE|quota|rate\s*limit/i.test(raw);
+      if (!isRetryable || i === maxRetries - 1) {
+        throw error;
+      }
+      const delay = Math.pow(2, i) * 1500 + Math.random() * 1000;
+      console.warn(`[AI Service] Retryable API error. Retrying in ${Math.round(delay)}ms... (Attempt ${i + 1}/${maxRetries})`);
+      await sleep(delay);
+    }
+  }
+  throw lastError;
+};
+
 export const generateContent = async (prompt: string): Promise<string> => {
   try {
-    const response = await getGenAI().models.generateContent({
+    const response = await withRetry(() => getGenAI().models.generateContent({
       model: env.GEMINI_MODEL,
       contents: prompt,
       config: GEMINI_CONFIG,
-    });
+    }));
     return response.text || '';
   } catch (error: any) {
     if (error?.message?.startsWith('AI ')) throw error;
@@ -261,11 +283,11 @@ export const generateContent = async (prompt: string): Promise<string> => {
 
 export const generateContentStream = async function* (prompt: string) {
   try {
-    const stream = await getGenAI().models.generateContentStream({
+    const stream = await withRetry(() => getGenAI().models.generateContentStream({
       model: env.GEMINI_MODEL,
       contents: prompt,
       config: GEMINI_CONFIG,
-    });
+    }));
     for await (const chunk of stream) {
       if (chunk.text) yield chunk.text;
     }
