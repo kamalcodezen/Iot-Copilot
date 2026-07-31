@@ -224,7 +224,7 @@ export default function Hero() {
                   )}
                   <motion.circle
                     cx={node.x} cy={node.y}
-                    r={node.r}
+                    r={node.r || 10}
                     fill={node.type === 'hub' ? '#3b82f6' : node.type === 'cloud' ? '#8b5cf6' : node.type === 'edge' ? '#f59e0b' : '#10b981'}
                     stroke={node.type === 'hub' ? '#93c5fd' : `${node.type === 'cloud' ? '#c4b5fd' : node.type === 'edge' ? '#fde68a' : '#a7f3d0'}`}
                     strokeWidth="2"
