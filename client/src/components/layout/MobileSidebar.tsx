@@ -9,6 +9,7 @@ import { User as UserType } from '@/types';
 import Avatar from '@/components/ui/Avatar';
 import { cn } from '@/utils/cn';
 import { NavLink } from './nav-links';
+import { stopLenis, startLenis } from '@/lib/lenis';
 
 interface MobileSidebarProps {
   open: boolean;
@@ -23,14 +24,21 @@ interface MobileSidebarProps {
 export default function MobileSidebar({ open, isAuthenticated, user, isLoggingOut, onClose, onLogout, links }: MobileSidebarProps) {
   const pathname = usePathname();
 
-  // Close the drawer when pressing Escape.
+  // Lock page scroll and close the drawer when pressing Escape.
   useEffect(() => {
     if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    stopLenis();
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      startLenis();
+      window.removeEventListener('keydown', handleKey);
+    };
   }, [open, onClose]);
 
   const isActive = (href: string) => {

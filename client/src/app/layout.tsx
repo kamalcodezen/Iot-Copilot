@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from 'next/font/google';
 import ToastProvider from '@/components/ui/Toast';
 import Navbar from '@/components/layout/Navbar';
 import AIAssistant from '@/components/ai/AIAssistant';
+import SmoothScroll from '@/components/layout/SmoothScroll';
 import NextTopLoader from 'nextjs-toploader';
 import './globals.css';
 
@@ -29,6 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={inter.variable}>
       <body className={`${jetbrainsMono.variable} font-sans antialiased dashboard-bg text-text-primary`}>
         <NextTopLoader color="var(--color-accent)" showSpinner={false} shadow="0 0 10px var(--color-accent),0 0 5px var(--color-accent)" />
+        <SmoothScroll />
         <ToastProvider />
         <Navbar />
         {children}
