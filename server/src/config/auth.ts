@@ -3,32 +3,17 @@ import { mongodbAdapter } from 'better-auth/adapters/mongodb';
 import { admin } from 'better-auth/plugins';
 import { toNodeHandler } from 'better-auth/node';
 import mongoose from 'mongoose';
-import { env } from '../config/env';
+import { env } from './env';
 import { logger } from '../utils/logger';
 import { sendPasswordResetEmail } from '../services/email';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let _auth: any = null;
-
-export function getAuth() {
-  if (!_auth) {
-    throw new Error('Auth not initialized. Call initAuth() after MongoDB connects.');
-  }
-  return _auth;
-}
-
-export function getAuthHandler() {
-  const auth = getAuth();
-  return toNodeHandler(auth);
-}
-
-export function initAuth() {
+function createAuth() {
   const db = mongoose.connection.db;
   if (!db) {
     throw new Error('MongoDB not connected. Cannot initialize auth.');
   }
 
-  _auth = betterAuth({
+  return betterAuth({
     database: mongodbAdapter(db),
     appName: 'IoT Copilot AI',
     baseURL: env.BETTER_AUTH_URL,
@@ -56,7 +41,8 @@ export function initAuth() {
         clientSecret: env.GOOGLE_CLIENT_SECRET,
       },
     },
-    trustedOrigins: [env.FRONTEND_URL], // FIX: Allow frontend to establish sessions
+    // The frontend must be trusted so its requests can establish sessions.
+    trustedOrigins: [env.FRONTEND_URL],
     plugins: [admin()],
     advanced: {
       defaultCookieAttributes: {
@@ -112,6 +98,25 @@ export function initAuth() {
       max: 100,
     },
   });
+}
 
+export type AuthInstance = ReturnType<typeof createAuth>;
+
+let _auth: AuthInstance | null = null;
+
+export function initAuth(): AuthInstance {
+  _auth = createAuth();
   return _auth;
+}
+
+export function getAuth(): AuthInstance {
+  if (!_auth) {
+    throw new Error('Auth not initialized. Call initAuth() after MongoDB connects.');
+  }
+  return _auth;
+}
+
+export function getAuthHandler() {
+  const auth = getAuth();
+  return toNodeHandler(auth);
 }

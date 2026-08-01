@@ -7,16 +7,6 @@ export interface AuthRequest extends Request {
   };
 }
 
-export interface PaginationQuery {
-  page?: string;
-  limit?: string;
-  search?: string;
-  status?: string;
-  category?: string;
-  difficulty?: string;
-  sort?: string;
-}
-
 export interface AIRequest {
   message: string;
   context?: string;

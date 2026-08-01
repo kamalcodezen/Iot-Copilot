@@ -11,8 +11,6 @@ export const PROJECT_CATEGORIES = [
 
 export const PROJECT_STATUSES = ['planning', 'in-progress', 'completed', 'paused'] as const;
 
-export const AI_TYPES = ['mentor', 'debug', 'interview', 'roadmap', 'recommendation'] as const;
-
 export const ACTIVITY_TYPES = [
   'project_created',
   'project_completed',

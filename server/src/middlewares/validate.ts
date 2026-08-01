@@ -1,31 +1,23 @@
 import { Request, Response, NextFunction } from 'express';
-import { ZodSchema, ZodError } from 'zod';
+import { z } from 'zod';
 
 interface ValidationSchemas {
-  body?: ZodSchema;
-  params?: ZodSchema;
-  query?: ZodSchema;
+  body?: z.ZodTypeAny;
+  params?: z.ZodTypeAny;
+  query?: z.ZodTypeAny;
 }
 
+// Parses the matching part of the request against its zod schema. On failure
+// the ZodError is passed to `next`, and the central errorHandler formats the
+// 400 response — this file must not format validation errors itself.
 export const validate = (schemas: ValidationSchemas) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, _res: Response, next: NextFunction) => {
     try {
-      if (schemas.body) schemas.body.parse(req.body);
-      if (schemas.params) schemas.params.parse(req.params);
-      if (schemas.query) schemas.query.parse(req.query);
+      schemas.body?.parse(req.body);
+      schemas.params?.parse(req.params);
+      schemas.query?.parse(req.query);
       next();
     } catch (error) {
-      if (error instanceof ZodError) {
-        res.status(400).json({
-          success: false,
-          message: 'Validation failed',
-          errors: error.errors.map((e) => ({
-            field: e.path.join('.'),
-            message: e.message,
-          })),
-        });
-        return;
-      }
       next(error);
     }
   };

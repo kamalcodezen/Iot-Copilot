@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import mongoose from 'mongoose';
 import { ZodError } from 'zod';
 import { AppError } from '../utils/errors';
 import { env } from '../config/env';
@@ -31,8 +32,8 @@ export const errorHandler = (
     return;
   }
 
-  const castErr = err as any;
-  if (castErr.name === 'CastError') {
+  // Mongoose throws CastError when a query id is not a valid ObjectId.
+  if (err instanceof mongoose.Error.CastError) {
     res.status(400).json({
       success: false,
       message: 'Invalid ID format',
@@ -40,7 +41,8 @@ export const errorHandler = (
     return;
   }
 
-  if (castErr.code === 11000) {
+  // MongoDB duplicate-key errors carry the numeric error code 11000.
+  if (err instanceof mongoose.mongo.MongoServerError && err.code === 11000) {
     res.status(409).json({
       success: false,
       message: 'Duplicate entry',

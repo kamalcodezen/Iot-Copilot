@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { PROJECT_CATEGORIES, PROJECT_STATUSES, SKILL_LEVELS } from '../utils/constants';
 
 export const mongoIdSchema = z.string().regex(/^[a-f0-9]{24}$/, 'Invalid MongoDB ID');
 
@@ -31,7 +32,7 @@ export const updateRoleSchema = z.object({
 export const updateProfileSchema = z.object({
   name: nameSchema.optional(),
   bio: z.string().max(500).optional(),
-  skillLevel: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
+  skillLevel: z.enum(SKILL_LEVELS).optional(),
   socialLinks: z.object({
     github: z.string().optional(),
     linkedin: z.string().optional(),
@@ -44,12 +45,16 @@ export const updateProfileSchema = z.object({
   }).optional(),
 });
 
+const projectCategoryEnum = z.enum(PROJECT_CATEGORIES);
+const projectStatusEnum = z.enum(PROJECT_STATUSES);
+const skillLevelEnum = z.enum(SKILL_LEVELS);
+
 export const projectSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters').max(200),
   description: z.string().min(10, 'Description must be at least 10 characters').max(5000),
-  category: z.enum(['smart-home', 'agriculture', 'healthcare', 'automation', 'robotics', 'other']),
-  difficulty: z.enum(['beginner', 'intermediate', 'advanced']),
-  status: z.enum(['planning', 'in-progress', 'completed', 'paused']).default('planning'),
+  category: projectCategoryEnum,
+  difficulty: skillLevelEnum,
+  status: projectStatusEnum.default('planning'),
   isPublic: z.boolean().default(false),
   tags: z.array(z.string()).default([]),
   components: z.array(z.object({
@@ -78,9 +83,9 @@ export const commentSchema = z.object({
 export const mongoIdParams = z.object({ id: mongoIdSchema });
 
 export const projectQuerySchema = paginationSchema.extend({
-  status: z.enum(['planning', 'in-progress', 'completed', 'paused']).optional(),
-  category: z.enum(['smart-home', 'agriculture', 'healthcare', 'automation', 'robotics', 'other']).optional(),
-  difficulty: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
+  status: projectStatusEnum.optional(),
+  category: projectCategoryEnum.optional(),
+  difficulty: skillLevelEnum.optional(),
 });
 
 export const projectUpdateSchema = projectSchema.partial();
@@ -98,7 +103,7 @@ export const assistantChatSchema = z.object({
 });
 
 export const generateRoadmapSchema = z.object({
-  skillLevel: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
+  skillLevel: skillLevelEnum.optional(),
   goals: z.string().optional(),
 });
 
@@ -109,7 +114,7 @@ export const recommendComponentsSchema = z.object({
 
 export const planProjectSchema = z.object({
   idea: z.string().min(1, 'Project idea is required'),
-  skillLevel: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
+  skillLevel: skillLevelEnum.optional(),
 });
 
 export const aiDebugSchema = z.object({
@@ -133,19 +138,23 @@ export const submitInterviewAnswerSchema = z.object({
 export const learningPathUpdateSchema = z.object({
   title: z.string().min(3).max(200).optional(),
   description: z.string().max(5000).optional(),
-  level: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
+  level: skillLevelEnum.optional(),
   isActive: z.boolean().optional(),
   modules: z.array(z.object({
     title: z.string(),
     description: z.string().optional(),
     status: z.enum(['pending', 'in-progress', 'completed']).optional(),
-    resources: z.array(z.any()).optional(),
+    resources: z.array(z.object({
+      title: z.string(),
+      url: z.string(),
+      type: z.enum(['video', 'article', 'doc']),
+    })).optional(),
     estimatedHours: z.number().optional(),
   })).optional(),
 });
 
 export const communityQuerySchema = paginationSchema.extend({
-  category: z.enum(['smart-home', 'agriculture', 'healthcare', 'automation', 'robotics', 'other']).optional(),
-  difficulty: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
+  category: projectCategoryEnum.optional(),
+  difficulty: skillLevelEnum.optional(),
   sort: z.string().optional(),
 });
