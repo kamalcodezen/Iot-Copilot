@@ -5,13 +5,12 @@ import Comment from '../models/Comment';
 import { AuthRequest } from '../types';
 import { asyncHandler } from '../middlewares/asyncHandler';
 import { requireUser } from '../utils/request';
-import { getPublicUserById, getPublicUsersByIds } from '../services/user';
-import { mongoIdParams, communityQuerySchema } from '../validators';
+import { sendData, sendPaginated } from '../utils/response';
+import { PublicUser, getPublicUserById, getPublicUsersByIds } from '../services/user';
+import { mongoIdParams } from '../validators/shared';
+import { communityQuerySchema } from '../validators/community';
 
-interface PublicUserInfo {
-  name: string;
-  avatar: string;
-}
+const ANONYMOUS_AUTHOR = { name: 'Anonymous', avatar: '' };
 
 // Replaces the project's userId with the author's public profile so the
 // community pages can render names and avatars without exposing emails.
@@ -21,15 +20,17 @@ async function attachUsers(projects: IProject[]) {
 
   return projects.map((project) => ({
     ...project.toObject(),
-    userId: userMap.get(project.userId) || { name: 'Anonymous', avatar: '' },
+    userId: (userMap.get(project.userId) || ANONYMOUS_AUTHOR) as PublicUser,
   }));
 }
 
+// Enriched comment: the raw comment with the author's public profile in place
+// of the author id.
 async function attachUserToComment(comment: InstanceType<typeof Comment>) {
   const user = await getPublicUserById(comment.userId);
   return {
     ...comment.toObject(),
-    userId: (user || { name: 'Anonymous', avatar: '' }) as PublicUserInfo,
+    userId: (user || ANONYMOUS_AUTHOR) as PublicUser,
   };
 }
 
@@ -49,11 +50,7 @@ export const getPublicProjects = asyncHandler(async (req: AuthRequest, res: Resp
   const total = await Project.countDocuments(query);
   const enriched = await attachUsers(projects);
 
-  res.json({
-    success: true,
-    data: enriched,
-    pagination: { page, limit, total, pages: Math.ceil(total / limit) },
-  });
+  sendPaginated(res, enriched, page, limit, total);
 });
 
 export const getPublicProject = asyncHandler(async (req: AuthRequest, res: Response) => {
@@ -65,12 +62,10 @@ export const getPublicProject = asyncHandler(async (req: AuthRequest, res: Respo
   }
 
   const user = await getPublicUserById(project.userId);
-  const data = {
+  sendData(res, {
     ...project.toObject(),
-    userId: (user || { name: 'Anonymous', avatar: '' }) as PublicUserInfo,
-  };
-
-  res.json({ success: true, data });
+    userId: (user || ANONYMOUS_AUTHOR) as PublicUser,
+  });
 });
 
 export const addComment = asyncHandler(async (req: AuthRequest, res: Response) => {
@@ -89,7 +84,7 @@ export const addComment = asyncHandler(async (req: AuthRequest, res: Response) =
   });
 
   const enriched = await attachUserToComment(comment);
-  res.status(201).json({ success: true, data: enriched });
+  sendData(res, enriched, 201);
 });
 
 export const getComments = asyncHandler(async (req: AuthRequest, res: Response) => {
@@ -97,5 +92,5 @@ export const getComments = asyncHandler(async (req: AuthRequest, res: Response) 
   const comments = await Comment.find({ projectId: id }).sort({ createdAt: -1 });
 
   const enriched = await Promise.all(comments.map(attachUserToComment));
-  res.json({ success: true, data: enriched });
+  sendData(res, enriched);
 });

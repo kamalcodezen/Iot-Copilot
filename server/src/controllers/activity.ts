@@ -4,8 +4,9 @@ import Project from '../models/Project';
 import { AuthRequest } from '../types';
 import { asyncHandler } from '../middlewares/asyncHandler';
 import { requireUser } from '../utils/request';
+import { sendData, sendPaginated } from '../utils/response';
 import { getUserById } from '../services/user';
-import { paginationSchema } from '../validators';
+import { paginationSchema } from '../validators/shared';
 
 export const getActivities = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id: userId } = requireUser(req);
@@ -18,11 +19,7 @@ export const getActivities = asyncHandler(async (req: AuthRequest, res: Response
 
   const total = await Activity.countDocuments({ userId });
 
-  res.json({
-    success: true,
-    data: activities,
-    pagination: { page, limit, total, pages: Math.ceil(total / limit) },
-  });
+  sendPaginated(res, activities, page, limit, total);
 });
 
 export const getStats = asyncHandler(async (req: AuthRequest, res: Response) => {
@@ -64,12 +61,9 @@ export const getStats = asyncHandler(async (req: AuthRequest, res: Response) => 
     lastActive: user?.lastActive ?? '',
   };
 
-  res.json({
-    success: true,
-    data: {
-      stats,
-      totals,
-      dailyActivity: dailyActivity.map((d) => ({ date: d._id, count: d.count })),
-    },
+  sendData(res, {
+    stats,
+    totals,
+    dailyActivity: dailyActivity.map((d) => ({ date: d._id, count: d.count })),
   });
 });

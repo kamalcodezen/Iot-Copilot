@@ -3,7 +3,8 @@ import { getUsers, updateUserRole, deleteUser, getStats } from '../controllers/a
 import { authenticate } from '../middlewares/auth';
 import { requireAdmin } from '../middlewares/admin';
 import { validate } from '../middlewares/validate';
-import { mongoIdParams, updateRoleSchema, paginationSchema } from '../validators';
+import { mongoIdParams, paginationSchema } from '../validators/shared';
+import { updateRoleSchema } from '../validators/auth';
 
 const router = Router();
 

@@ -5,8 +5,47 @@ import Activity from '../models/Activity';
 import { AuthRequest } from '../types';
 import { asyncHandler } from '../middlewares/asyncHandler';
 import { requireUser } from '../utils/request';
+import { sendData, sendMessage, sendPaginated } from '../utils/response';
 import { markUserActive, addUserStat } from '../services/user';
-import { mongoIdParams, projectQuerySchema } from '../validators';
+import { mongoIdParams } from '../validators/shared';
+import { projectQuerySchema } from '../validators/project';
+
+// Fetches a project the requesting user may read: their own project, or any
+// public one. Responds 404/403 with the standard messages and returns null so
+// the handler can stop early.
+async function findAccessibleProject(userId: string, id: string, res: Response): Promise<IProject | null> {
+  const project = await Project.findById(id);
+
+  if (!project) {
+    res.status(404).json({ success: false, message: 'Project not found' });
+    return null;
+  }
+
+  if (project.userId !== userId && !project.isPublic) {
+    res.status(403).json({ success: false, message: 'Not authorized' });
+    return null;
+  }
+
+  return project;
+}
+
+// Same contract as `findAccessibleProject`, but only for projects the
+// requesting user owns.
+async function findOwnedProject(userId: string, id: string, res: Response): Promise<IProject | null> {
+  const project = await Project.findById(id);
+
+  if (!project) {
+    res.status(404).json({ success: false, message: 'Project not found' });
+    return null;
+  }
+
+  if (project.userId !== userId) {
+    res.status(403).json({ success: false, message: 'Not authorized' });
+    return null;
+  }
+
+  return project;
+}
 
 export const getProjects = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id: userId } = requireUser(req);
@@ -25,29 +64,16 @@ export const getProjects = asyncHandler(async (req: AuthRequest, res: Response) 
 
   const total = await Project.countDocuments(query);
 
-  res.json({
-    success: true,
-    data: projects,
-    pagination: { page, limit, total, pages: Math.ceil(total / limit) },
-  });
+  sendPaginated(res, projects, page, limit, total);
 });
 
 export const getProject = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id: userId } = requireUser(req);
   const { id } = mongoIdParams.parse(req.params);
-  const project = await Project.findById(id);
+  const project = await findAccessibleProject(userId, id, res);
+  if (!project) return;
 
-  if (!project) {
-    res.status(404).json({ success: false, message: 'Project not found' });
-    return;
-  }
-
-  if (project.userId !== userId && !project.isPublic) {
-    res.status(403).json({ success: false, message: 'Not authorized' });
-    return;
-  }
-
-  res.json({ success: true, data: project });
+  sendData(res, project);
 });
 
 export const createProject = asyncHandler(async (req: AuthRequest, res: Response) => {
@@ -67,26 +93,17 @@ export const createProject = asyncHandler(async (req: AuthRequest, res: Response
     metadata: { projectId: project._id },
   });
 
-  res.status(201).json({ success: true, data: project });
+  sendData(res, project, 201);
 });
 
 export const updateProject = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id: userId } = requireUser(req);
   const { id } = mongoIdParams.parse(req.params);
-  const project = await Project.findById(id);
-
-  if (!project) {
-    res.status(404).json({ success: false, message: 'Project not found' });
-    return;
-  }
-
-  if (project.userId !== userId) {
-    res.status(403).json({ success: false, message: 'Not authorized' });
-    return;
-  }
+  const project = await findOwnedProject(userId, id, res);
+  if (!project) return;
 
   const updated = await Project.findByIdAndUpdate(id, req.body, { new: true });
-  res.json({ success: true, data: updated });
+  sendData(res, updated);
 });
 
 export const deleteProject = asyncHandler(async (req: AuthRequest, res: Response) => {
@@ -105,23 +122,14 @@ export const deleteProject = asyncHandler(async (req: AuthRequest, res: Response
   }
 
   await Project.findByIdAndDelete(id);
-  res.json({ success: true, message: 'Project deleted' });
+  sendMessage(res, 'Project deleted');
 });
 
 export const updateProgress = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id: userId } = requireUser(req);
   const { id } = mongoIdParams.parse(req.params);
-  const project = await Project.findById(id);
-
-  if (!project) {
-    res.status(404).json({ success: false, message: 'Project not found' });
-    return;
-  }
-
-  if (project.userId !== userId) {
-    res.status(403).json({ success: false, message: 'Not authorized' });
-    return;
-  }
+  const project = await findOwnedProject(userId, id, res);
+  if (!project) return;
 
   const progress = req.body.progress as number;
   project.progress = progress;
@@ -137,7 +145,7 @@ export const updateProgress = asyncHandler(async (req: AuthRequest, res: Respons
   }
 
   await project.save();
-  res.json({ success: true, data: project });
+  sendData(res, project);
 });
 
 export const toggleLike = asyncHandler(async (req: AuthRequest, res: Response) => {
@@ -151,5 +159,5 @@ export const toggleLike = asyncHandler(async (req: AuthRequest, res: Response) =
   project.likes += 1;
   await project.save();
 
-  res.json({ success: true, data: { likes: project.likes } });
+  sendData(res, { likes: project.likes });
 });

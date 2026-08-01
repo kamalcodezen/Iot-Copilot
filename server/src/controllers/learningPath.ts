@@ -3,47 +3,48 @@ import LearningPath from '../models/LearningPath';
 import { AuthRequest } from '../types';
 import { asyncHandler } from '../middlewares/asyncHandler';
 import { requireUser } from '../utils/request';
-import { mongoIdParams } from '../validators';
+import { sendData, sendMessage } from '../utils/response';
+import { mongoIdParams } from '../validators/shared';
+
+// Fetches a learning path owned by the requesting user. Responds 404/403 with
+// the standard messages and returns null so the handler can stop early.
+async function findOwnedPath(userId: string, id: string, res: Response) {
+  const path = await LearningPath.findById(id);
+
+  if (!path) {
+    res.status(404).json({ success: false, message: 'Learning path not found' });
+    return null;
+  }
+
+  if (path.userId !== userId) {
+    res.status(403).json({ success: false, message: 'Not authorized' });
+    return null;
+  }
+
+  return path;
+}
 
 export const getLearningPaths = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id: userId } = requireUser(req);
   const paths = await LearningPath.find({ userId }).sort({ createdAt: -1 });
 
-  res.json({ success: true, data: paths });
+  sendData(res, paths);
 });
 
 export const getLearningPath = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id: userId } = requireUser(req);
   const { id } = mongoIdParams.parse(req.params);
-  const path = await LearningPath.findById(id);
+  const path = await findOwnedPath(userId, id, res);
+  if (!path) return;
 
-  if (!path) {
-    res.status(404).json({ success: false, message: 'Learning path not found' });
-    return;
-  }
-
-  if (path.userId !== userId) {
-    res.status(403).json({ success: false, message: 'Not authorized' });
-    return;
-  }
-
-  res.json({ success: true, data: path });
+  sendData(res, path);
 });
 
 export const updateLearningPath = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id: userId } = requireUser(req);
   const { id } = mongoIdParams.parse(req.params);
-  const path = await LearningPath.findById(id);
-
-  if (!path) {
-    res.status(404).json({ success: false, message: 'Learning path not found' });
-    return;
-  }
-
-  if (path.userId !== userId) {
-    res.status(403).json({ success: false, message: 'Not authorized' });
-    return;
-  }
+  const path = await findOwnedPath(userId, id, res);
+  if (!path) return;
 
   const { modules } = req.body as { modules?: Array<{ status?: string }> };
   const updates = { ...req.body };
@@ -59,24 +60,15 @@ export const updateLearningPath = asyncHandler(async (req: AuthRequest, res: Res
   }
 
   const updated = await LearningPath.findByIdAndUpdate(id, updates, { new: true });
-  res.json({ success: true, data: updated });
+  sendData(res, updated);
 });
 
 export const deleteLearningPath = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id: userId } = requireUser(req);
   const { id } = mongoIdParams.parse(req.params);
-  const path = await LearningPath.findById(id);
-
-  if (!path) {
-    res.status(404).json({ success: false, message: 'Learning path not found' });
-    return;
-  }
-
-  if (path.userId !== userId) {
-    res.status(403).json({ success: false, message: 'Not authorized' });
-    return;
-  }
+  const path = await findOwnedPath(userId, id, res);
+  if (!path) return;
 
   await LearningPath.findByIdAndDelete(id);
-  res.json({ success: true, message: 'Learning path deleted' });
+  sendMessage(res, 'Learning path deleted');
 });

@@ -4,20 +4,11 @@ import { AppError, RateLimitError } from '../utils/errors';
 
 const PLACEHOLDER_KEY = 'YOUR_API_KEY';
 
-function handleGeminiError(error: unknown): never {
-  const raw = error instanceof Error ? error.message : String(error);
-  console.error(`[AI Service] Gemini API error: ${raw.slice(0, 300)}`);
-  if (/429|RESOURCE_EXHAUSTED|quota|rate\s*limit/i.test(raw)) {
-    throw new RateLimitError('AI quota exceeded. Please try again later.');
-  }
-  if (/API[_ ]?key|API_KEY_INVALID|400/i.test(raw)) {
-    throw new AppError(400, 'AI_CONFIG_ERROR', 'AI service is not configured. Please set a valid GEMINI_API_KEY in server .env');
-  }
-  if (/503|UNAVAILABLE|INTERNAL/i.test(raw)) {
-    throw new AppError(503, 'AI_PROVIDER_ERROR', 'AI provider error. Please try again.');
-  }
-  throw new AppError(500, 'AI_SERVICE_ERROR', 'AI service error. Please try again.');
-}
+// --- Prompt builders ----------------------------------------------------------
+
+// Each builder composes the exact instructions sent to the model for one AI
+// feature. The strings are part of the product behavior, so they are kept
+// verbatim — only their grouping changed during refactoring.
 
 export const buildMentorPrompt = (
   message: string,
@@ -237,6 +228,8 @@ USER: ${message}
 Respond now (in the user's language):`;
 };
 
+// --- Generation infrastructure ------------------------------------------------
+
 function getGenAI(): GoogleGenAI {
   if (!env.GEMINI_API_KEY || env.GEMINI_API_KEY.trim() === '' || env.GEMINI_API_KEY === PLACEHOLDER_KEY) {
     throw new Error('AI service is not configured. Please set a valid GEMINI_API_KEY in server .env');
@@ -278,6 +271,25 @@ const withRetry = async <T>(operation: () => Promise<T>, maxRetries = 3): Promis
   throw lastError;
 };
 
+// Maps raw Gemini errors to typed AppErrors so controllers can distinguish
+// quota, config, and provider failures from generic ones.
+function handleGeminiError(error: unknown): never {
+  const raw = error instanceof Error ? error.message : String(error);
+  console.error(`[AI Service] Gemini API error: ${raw.slice(0, 300)}`);
+  if (/429|RESOURCE_EXHAUSTED|quota|rate\s*limit/i.test(raw)) {
+    throw new RateLimitError('AI quota exceeded. Please try again later.');
+  }
+  if (/API[_ ]?key|API_KEY_INVALID|400/i.test(raw)) {
+    throw new AppError(400, 'AI_CONFIG_ERROR', 'AI service is not configured. Please set a valid GEMINI_API_KEY in server .env');
+  }
+  if (/503|UNAVAILABLE|INTERNAL/i.test(raw)) {
+    throw new AppError(503, 'AI_PROVIDER_ERROR', 'AI provider error. Please try again.');
+  }
+  throw new AppError(500, 'AI_SERVICE_ERROR', 'AI service error. Please try again.');
+}
+
+// --- Public generation API ----------------------------------------------------
+
 export const generateContent = async (prompt: string): Promise<string> => {
   try {
     const response = await withRetry(() => getGenAI().models.generateContent({
@@ -287,7 +299,8 @@ export const generateContent = async (prompt: string): Promise<string> => {
     }));
     return response.text || '';
   } catch (error) {
-    // handleGeminiError always throws a typed AppError, so this line is unreachable.
+    // handleGeminiError never returns (it always throws a typed AppError),
+    // so the catch block needs no return value.
     handleGeminiError(error);
   }
 };
@@ -303,7 +316,7 @@ export const generateContentStream = async function* (prompt: string) {
       if (chunk.text) yield chunk.text;
     }
   } catch (error) {
-    // handleGeminiError always throws a typed AppError, so this line is unreachable.
+    // See generateContent: handleGeminiError always throws, never returns.
     handleGeminiError(error);
   }
 };

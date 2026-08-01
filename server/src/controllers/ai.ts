@@ -3,6 +3,7 @@ import { AuthRequest, AIRequest } from '../types';
 import { asyncHandler } from '../middlewares/asyncHandler';
 import { AppError } from '../utils/errors';
 import { requireUser } from '../utils/request';
+import { sendData } from '../utils/response';
 import {
   generateContent,
   generateContentStream,
@@ -65,7 +66,9 @@ async function streamReply(res: Response, prompt: string): Promise<string> {
   return fullResponse;
 }
 
-function parseRoadmapResponse(response: string) {
+// Parses the JSON array the model returns for roadmaps. Falls back to a single
+// "IoT Fundamentals" module when the model replies with plain text instead.
+function parseRoadmapModules(response: string) {
   try {
     return JSON.parse(response.replace(/```json|```/g, '').trim());
   } catch {
@@ -177,7 +180,7 @@ export const assistantChat = async (req: AuthRequest, res: Response) => {
 export const getChatHistory = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id: userId } = requireUser(req);
   const memories = await getMemoryByType(userId, 'mentor', 50);
-  res.json({ success: true, data: memories });
+  sendData(res, memories);
 });
 
 export const generateRoadmap = asyncHandler(async (req: AuthRequest, res: Response) => {
@@ -186,7 +189,7 @@ export const generateRoadmap = asyncHandler(async (req: AuthRequest, res: Respon
 
   const prompt = buildRoadmapPrompt(skillLevel || 'beginner', goals || '');
   const response = await generateContent(prompt);
-  const modules = parseRoadmapResponse(response);
+  const modules = parseRoadmapModules(response);
 
   const learningPath = await LearningPath.create({
     userId,
@@ -204,7 +207,7 @@ export const generateRoadmap = asyncHandler(async (req: AuthRequest, res: Respon
     description: `Generated ${skillLevel || 'beginner'} learning roadmap`,
   });
 
-  res.json({ success: true, data: learningPath });
+  sendData(res, learningPath);
 });
 
 export const recommendComponents = asyncHandler(async (req: AuthRequest, res: Response) => {
@@ -214,7 +217,7 @@ export const recommendComponents = asyncHandler(async (req: AuthRequest, res: Re
   const response = await generateContent(buildComponentPrompt(project || '', budget || ''));
   await saveMemory(userId, 'recommendation', 'assistant', response, { topic: 'component_recommendation' });
 
-  res.json({ success: true, data: response });
+  sendData(res, response);
 });
 
 export const planProject = asyncHandler(async (req: AuthRequest, res: Response) => {
@@ -224,7 +227,7 @@ export const planProject = asyncHandler(async (req: AuthRequest, res: Response) 
   const response = await generateContent(buildProjectPlanPrompt(idea || '', skillLevel || 'beginner'));
   await saveMemory(userId, 'mentor', 'assistant', response, { topic: 'project_plan' });
 
-  res.json({ success: true, data: response });
+  sendData(res, response);
 });
 
 export const interviewQuestions = asyncHandler(async (req: AuthRequest, res: Response) => {
@@ -234,7 +237,7 @@ export const interviewQuestions = asyncHandler(async (req: AuthRequest, res: Res
   const response = await generateContent(buildInterviewPrompt(experienceLevel || 'fresher', topic || 'General IoT'));
   await saveMemory(userId, 'interview', 'assistant', response, { topic: 'interview_questions' });
 
-  res.json({ success: true, data: response });
+  sendData(res, response);
 });
 
 export const submitInterviewAnswer = asyncHandler(async (req: AuthRequest, res: Response) => {
@@ -245,7 +248,7 @@ export const submitInterviewAnswer = asyncHandler(async (req: AuthRequest, res: 
   await saveMemory(userId, 'interview', 'assistant', response, { topic: 'interview_feedback' });
   await Activity.create({ userId, type: 'interview_practice', description: 'Practiced interview question' });
 
-  res.json({ success: true, data: response });
+  sendData(res, response);
 });
 
 export const recommendNext = asyncHandler(async (req: AuthRequest, res: Response) => {
@@ -256,5 +259,5 @@ export const recommendNext = asyncHandler(async (req: AuthRequest, res: Response
   const prompt = buildRecommendPrompt(buildContextString(recentMemories), user?.skillLevel || 'beginner');
   const response = await generateContent(prompt);
 
-  res.json({ success: true, data: response });
+  sendData(res, response);
 });

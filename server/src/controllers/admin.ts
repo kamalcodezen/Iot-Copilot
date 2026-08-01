@@ -4,7 +4,8 @@ import Project from '../models/Project';
 import Activity from '../models/Activity';
 import { AuthRequest } from '../types';
 import { asyncHandler } from '../middlewares/asyncHandler';
-import { mongoIdParams, paginationSchema } from '../validators';
+import { sendData, sendMessage, sendPaginated } from '../utils/response';
+import { mongoIdParams, paginationSchema } from '../validators/shared';
 import {
   getUserById,
   findUsers,
@@ -18,11 +19,7 @@ export const getUsers = asyncHandler(async (req: AuthRequest, res: Response) => 
 
   const { users, total } = await findUsers(search, page, limit);
 
-  res.json({
-    success: true,
-    data: users,
-    pagination: { page, limit, total, pages: Math.ceil(total / limit) },
-  });
+  sendPaginated(res, users, page, limit, total);
 });
 
 export const updateUserRole = asyncHandler(async (req: AuthRequest, res: Response) => {
@@ -35,7 +32,7 @@ export const updateUserRole = asyncHandler(async (req: AuthRequest, res: Respons
     return;
   }
 
-  res.json({ success: true, data: updated });
+  sendData(res, updated);
 });
 
 export const deleteUser = asyncHandler(async (req: AuthRequest, res: Response) => {
@@ -55,7 +52,7 @@ export const deleteUser = asyncHandler(async (req: AuthRequest, res: Response) =
   await mongoose.connection.db?.collection('session').deleteMany({ userId: id });
   await mongoose.connection.db?.collection('account').deleteMany({ userId: id });
 
-  res.json({ success: true, message: 'User deleted' });
+  sendMessage(res, 'User deleted');
 });
 
 export const getStats = asyncHandler(async (req: AuthRequest, res: Response) => {
@@ -70,12 +67,9 @@ export const getStats = asyncHandler(async (req: AuthRequest, res: Response) => 
     { $group: { _id: '$category', count: { $sum: 1 } } },
   ]);
 
-  res.json({
-    success: true,
-    data: {
-      totals: { totalUsers, totalProjects, totalPublicProjects, totalCompletedProjects },
-      recentUsers,
-      projectsByCategory,
-    },
+  sendData(res, {
+    totals: { totalUsers, totalProjects, totalPublicProjects, totalCompletedProjects },
+    recentUsers,
+    projectsByCategory,
   });
 });

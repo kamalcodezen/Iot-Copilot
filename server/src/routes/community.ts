@@ -2,7 +2,8 @@ import { Router } from 'express';
 import { getPublicProjects, getPublicProject, addComment, getComments } from '../controllers/community';
 import { authenticate, optionalAuth } from '../middlewares/auth';
 import { validate } from '../middlewares/validate';
-import { mongoIdParams, commentSchema, communityQuerySchema } from '../validators';
+import { mongoIdParams } from '../validators/shared';
+import { commentSchema, communityQuerySchema } from '../validators/community';
 
 const router = Router();
 

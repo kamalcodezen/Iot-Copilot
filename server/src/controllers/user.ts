@@ -3,6 +3,7 @@ import Project from '../models/Project';
 import { AuthRequest } from '../types';
 import { asyncHandler } from '../middlewares/asyncHandler';
 import { requireUser } from '../utils/request';
+import { sendData, sendPaginated } from '../utils/response';
 import {
   getUserById,
   updateUserProfile,
@@ -10,7 +11,12 @@ import {
   getUserBadges as getUserBadgesById,
 } from '../services/user';
 import { uploadImage } from '../services/cloudinary';
-import { mongoIdParams, paginationSchema } from '../validators';
+import { mongoIdParams, paginationSchema } from '../validators/shared';
+
+// Profile routes can be used by the profile owner or by an admin.
+function isSelfOrAdmin(userId: string, targetId: string, role: string): boolean {
+  return userId === targetId || role === 'admin';
+}
 
 export const getProfile = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id } = mongoIdParams.parse(req.params);
@@ -19,25 +25,25 @@ export const getProfile = asyncHandler(async (req: AuthRequest, res: Response) =
     res.status(404).json({ success: false, message: 'User not found' });
     return;
   }
-  res.json({ success: true, data: user });
+  sendData(res, user);
 });
 
 export const updateProfile = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id: userId, role } = requireUser(req);
   const { id } = mongoIdParams.parse(req.params);
-  if (userId !== id && role !== 'admin') {
+  if (!isSelfOrAdmin(userId, id, role)) {
     res.status(403).json({ success: false, message: 'Not authorized' });
     return;
   }
 
   const updated = await updateUserProfile(id, req.body);
-  res.json({ success: true, data: updated });
+  sendData(res, updated);
 });
 
 export const uploadAvatar = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id: userId, role } = requireUser(req);
   const { id } = mongoIdParams.parse(req.params);
-  if (userId !== id && role !== 'admin') {
+  if (!isSelfOrAdmin(userId, id, role)) {
     res.status(403).json({ success: false, message: 'Not authorized' });
     return;
   }
@@ -49,7 +55,7 @@ export const uploadAvatar = asyncHandler(async (req: AuthRequest, res: Response)
 
   const url = await uploadImage(req.file);
   const updated = await setUserAvatar(id, url);
-  res.json({ success: true, data: updated });
+  sendData(res, updated);
 });
 
 export const getUserProjects = asyncHandler(async (req: AuthRequest, res: Response) => {
@@ -63,15 +69,11 @@ export const getUserProjects = asyncHandler(async (req: AuthRequest, res: Respon
 
   const total = await Project.countDocuments({ userId: id });
 
-  res.json({
-    success: true,
-    data: projects,
-    pagination: { page, limit, total, pages: Math.ceil(total / limit) },
-  });
+  sendPaginated(res, projects, page, limit, total);
 });
 
 export const getUserBadges = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id } = mongoIdParams.parse(req.params);
   const badges = await getUserBadgesById(id);
-  res.json({ success: true, data: badges });
+  sendData(res, badges);
 });
