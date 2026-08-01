@@ -11,7 +11,6 @@ export const publicLinks: NavLink[] = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/#features', label: 'Features' },
   { href: '/ai-mentor', label: 'AI Mentor', icon: Bot },
-  { href: '/contact', label: 'Contact' },
 ];
 
 export const appLinks: NavLink[] = [

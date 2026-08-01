@@ -193,10 +193,7 @@ export default function RegisterPage() {
                 className="w-4 h-4 mt-0.5 rounded border-border-default bg-bg-card text-accent focus:ring-accent/50 accent-accent"
               />
               <span className="text-xs font-semibold text-text-secondary group-hover:text-text-primary transition-colors">
-                I agree to the{' '}
-                <Link href="/terms" className="text-accent hover:text-accent-hover">Terms & Conditions</Link>
-                {' '}and{' '}
-                <Link href="/privacy" className="text-accent hover:text-accent-hover">Privacy Policy</Link>
+                I agree to the <span className="text-accent">Terms &amp; Conditions</span> and <span className="text-accent">Privacy Policy</span>
               </span>
             </label>
 

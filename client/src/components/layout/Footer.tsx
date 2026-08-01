@@ -12,22 +12,8 @@ const footerLinks = {
     { label: 'Roadmap', href: '/#roadmap' },
   ],
   Resources: [
-    { label: 'Documentation', href: '/docs' },
     { label: 'Community Projects', href: '/explore' },
-    { label: 'API Reference', href: '/docs/api' },
-    { label: 'Tutorials', href: '/docs/tutorials' },
-  ],
-  Company: [
-    { label: 'About', href: '/about' },
-    { label: 'Blog', href: '/blog' },
-    { label: 'Careers', href: '/careers' },
-    { label: 'Contact', href: '/contact' },
-  ],
-  Legal: [
-    { label: 'Privacy Policy', href: '/privacy' },
-    { label: 'Terms of Service', href: '/terms' },
-    { label: 'Cookie Policy', href: '/cookies' },
-    { label: 'GDPR', href: '/gdpr' },
+    { label: 'Contact Us', href: 'mailto:hello@iotcopilot.com' },
   ],
 };
 
@@ -37,7 +23,7 @@ export default function Footer() {
   return (
     <footer className="relative border-t border-border-default bg-bg-secondary/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 lg:gap-12">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-8 lg:gap-12">
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-2.5 mb-4">
               <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-accent to-blue-600 flex items-center justify-center shadow-lg shadow-accent/20">
