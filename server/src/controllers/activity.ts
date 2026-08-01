@@ -51,11 +51,24 @@ export const getStats = asyncHandler(async (req: AuthRequest, res: Response) => 
     { $sort: { _id: 1 } },
   ]);
 
+  const totals = { totalProjects, completedProjects, inProgressProjects };
+
+  // Stats are stored as plain fields on the user document (better-auth has no
+  // nested profile object), so gather them into the shape the dashboard uses.
+  const stats = {
+    totalProjects: user?.totalProjects ?? totals.totalProjects,
+    completedProjects: user?.completedProjects ?? totals.completedProjects,
+    learningStreak: user?.learningStreak ?? 0,
+    totalSessions: user?.totalSessions ?? 0,
+    totalHours: user?.totalHours ?? 0,
+    lastActive: user?.lastActive ?? '',
+  };
+
   res.json({
     success: true,
     data: {
-      stats: user?.stats || {},
-      totals: { totalProjects, completedProjects, inProgressProjects },
+      stats,
+      totals,
       dailyActivity: dailyActivity.map((d) => ({ date: d._id, count: d.count })),
     },
   });
