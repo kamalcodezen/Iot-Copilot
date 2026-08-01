@@ -43,7 +43,8 @@ export const aiChat = async (req: AuthRequest, res: Response) => {
         fullResponse += chunk;
         res.write(`event: token\ndata: ${JSON.stringify({ token: chunk })}\n\n`);
       }
-    } catch (streamError) {
+    } catch (streamError: any) {
+      if (streamError?.message?.startsWith('AI ')) throw streamError;
       fullResponse = await generateContent(prompt);
       res.write(`event: token\ndata: ${JSON.stringify({ token: fullResponse })}\n\n`);
     }
@@ -152,7 +153,8 @@ export const aiDebug = async (req: AuthRequest, res: Response) => {
         fullResponse += chunk;
         res.write(`event: token\ndata: ${JSON.stringify({ token: chunk })}\n\n`);
       }
-    } catch {
+    } catch (streamError: any) {
+      if (streamError?.message?.startsWith('AI ')) throw streamError;
       fullResponse = await generateContent(prompt);
       res.write(`event: token\ndata: ${JSON.stringify({ token: fullResponse })}\n\n`);
     }
@@ -247,7 +249,8 @@ export const assistantChat = async (req: AuthRequest, res: Response) => {
         fullResponse += chunk;
         res.write(`event: token\ndata: ${JSON.stringify({ token: chunk })}\n\n`);
       }
-    } catch (streamError) {
+    } catch (streamError: any) {
+      if (streamError?.message?.startsWith('AI ')) throw streamError;
       fullResponse = await generateContent(prompt);
       res.write(`event: token\ndata: ${JSON.stringify({ token: fullResponse })}\n\n`);
     }

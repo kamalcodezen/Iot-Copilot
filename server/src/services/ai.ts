@@ -1,20 +1,21 @@
 import { GoogleGenAI } from '@google/genai';
 import { env } from '../config/env';
+import { AppError, RateLimitError } from '../utils/errors';
 
 const PLACEHOLDER_KEY = 'YOUR_API_KEY';
 
 function handleGeminiError(error: unknown): never {
   const raw = error instanceof Error ? error.message : String(error);
   if (/429|RESOURCE_EXHAUSTED|quota|rate\s*limit/i.test(raw)) {
-    throw new Error('AI quota exceeded. Please try again later.');
+    throw new RateLimitError('AI quota exceeded. Please try again later.');
   }
   if (/API[_ ]?key|API_KEY_INVALID|400/i.test(raw)) {
-    throw new Error('AI service is not configured. Please set a valid GEMINI_API_KEY in server .env');
+    throw new AppError(400, 'AI_CONFIG_ERROR', 'AI service is not configured. Please set a valid GEMINI_API_KEY in server .env');
   }
   if (/503|UNAVAILABLE|INTERNAL/i.test(raw)) {
-    throw new Error('AI provider error. Please try again.');
+    throw new AppError(503, 'AI_PROVIDER_ERROR', 'AI provider error. Please try again.');
   }
-  throw new Error('AI service error. Please try again.');
+  throw new AppError(500, 'AI_SERVICE_ERROR', 'AI service error. Please try again.');
 }
 
 export const buildMentorPrompt = (
@@ -258,6 +259,14 @@ const withRetry = async <T>(operation: () => Promise<T>, maxRetries = 3): Promis
       if (!isRetryable || i === maxRetries - 1) {
         throw error;
       }
+      
+      // Check if API specifies a long retry delay (e.g. "Please retry in 46.4s")
+      const retryMatch = raw.match(/retry in ([\d\.]+)s/i);
+      if (retryMatch && parseFloat(retryMatch[1]) > 10) {
+        console.warn(`[AI Service] API requested a ${retryMatch[1]}s wait. Aborting retry to avoid hanging.`);
+        throw error;
+      }
+
       const delay = Math.pow(2, i) * 1500 + Math.random() * 1000;
       console.warn(`[AI Service] Retryable API error. Retrying in ${Math.round(delay)}ms... (Attempt ${i + 1}/${maxRetries})`);
       await sleep(delay);
