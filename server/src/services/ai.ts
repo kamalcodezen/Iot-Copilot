@@ -249,23 +249,24 @@ const withRetry = async <T>(operation: () => Promise<T>, maxRetries = 3): Promis
     } catch (error) {
       lastError = error;
       const raw = error instanceof Error ? error.message : String(error);
-      const isRetryable = /429|503|RESOURCE_EXHAUSTED|UNAVAILABLE|quota|rate\s*limit/i.test(raw);
-      if (!isRetryable || i === maxRetries - 1) {
-        throw error;
+
+      // Rate-limit and quota errors (429, RESOURCE_EXHAUSTED) are never
+      // retried: a retry inside the same window cannot succeed and only
+      // burns another unit of the per-minute quota. Each retry is a
+      // duplicate generation request, so retrying quota errors exhausts
+      // the free-tier budget (5 req/min) several times faster and turns
+      // every subsequent AI call into a 429. Only transient provider
+      // availability errors are retried.
+      const isQuotaError = /429|RESOURCE_EXHAUSTED|quota|rate\s*limit/i.test(raw);
+      const isTransientError = /503|UNAVAILABLE|INTERNAL/i.test(raw);
+      if (!isQuotaError && isTransientError && i < maxRetries - 1) {
+        const delay = Math.pow(2, i) * 1500 + Math.random() * 1000;
+        console.warn(`[AI Service] Transient API error. Retrying in ${Math.round(delay)}ms... (Attempt ${i + 1}/${maxRetries})`);
+        await sleep(delay);
+        continue;
       }
 
-      // The API sometimes asks for a long wait (e.g. "Please retry in 46.4s")
-      // when the free-tier quota is exhausted. Retrying after such a wait
-      // would hang the request, so the error is surfaced immediately instead.
-      const retryMatch = raw.match(/retry in ([\d\.]+)s/i);
-      if (retryMatch && parseFloat(retryMatch[1]) > 10) {
-        console.warn(`[AI Service] API requested a ${retryMatch[1]}s wait. Aborting retry to avoid hanging.`);
-        throw error;
-      }
-
-      const delay = Math.pow(2, i) * 1500 + Math.random() * 1000;
-      console.warn(`[AI Service] Retryable API error. Retrying in ${Math.round(delay)}ms... (Attempt ${i + 1}/${maxRetries})`);
-      await sleep(delay);
+      throw error;
     }
   }
   throw lastError;
