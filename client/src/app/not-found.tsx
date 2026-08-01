@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { CircuitBoard, Home, ArrowLeft } from 'lucide-react';
 import Button from '@/components/ui/Button';
@@ -17,7 +16,7 @@ export default function NotFound() {
         <p className="text-lg font-bold text-text-secondary mb-2">Page Not Found</p>
         <p className="text-sm font-semibold text-text-tertiary mb-8 max-w-sm mx-auto">The page you&apos;re looking for doesn&apos;t exist or has been moved.</p>
         <div className="flex items-center justify-center gap-3">
-          <Link href="/"><Button variant="primary"><Home size={16} className="mr-2" />Back to Home</Button></Link>
+          <Button href="/" variant="primary"><Home size={16} className="mr-2" />Back to Home</Button>
           <button onClick={() => window.history.back()} className="inline-flex items-center gap-1.5 text-sm font-bold text-text-secondary hover:text-text-primary transition-colors px-4 py-2.5 rounded-xl hover:bg-glass">
             <ArrowLeft size={15} /> Go back
           </button>

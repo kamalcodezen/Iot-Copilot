@@ -136,12 +136,8 @@ export default function MobileSidebar({ open, isAuthenticated, user, isLoggingOu
                   </button>
                 ) : (
                   <div className="space-y-3">
-                    <Link href="/auth/login" onClick={onClose} className="block">
-                      <button className="w-full px-5 py-3 text-sm font-bold rounded-2xl border border-white/10 text-white hover:bg-white/10 transition-all">Login</button>
-                    </Link>
-                    <Link href="/auth/register" onClick={onClose} className="block">
-                      <button className="w-full px-5 py-3 text-sm font-bold rounded-2xl bg-gradient-to-r from-accent to-teal-400 text-white shadow-[0_0_15px_rgba(20,184,166,0.3)] hover:shadow-[0_0_25px_rgba(20,184,166,0.5)] transition-all">Register</button>
-                    </Link>
+                    <Link href="/auth/login" onClick={onClose} className="block w-full px-5 py-3 text-sm font-bold rounded-2xl border border-white/10 text-white hover:bg-white/10 transition-all text-center">Login</Link>
+                    <Link href="/auth/register" onClick={onClose} className="block w-full px-5 py-3 text-sm font-bold rounded-2xl bg-gradient-to-r from-accent to-teal-400 text-white shadow-[0_0_15px_rgba(20,184,166,0.3)] hover:shadow-[0_0_25px_rgba(20,184,166,0.5)] transition-all text-center">Register</Link>
                   </div>
                 )}
               </div>

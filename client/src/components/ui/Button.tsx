@@ -1,12 +1,14 @@
 'use client';
 
 import { ButtonHTMLAttributes, forwardRef } from 'react';
+import Link from 'next/link';
 import { cn } from '@/utils/cn';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'ghost' | 'outline' | 'danger';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
+  href?: string;
 }
 
 const variants = {
@@ -27,21 +29,31 @@ const sizes = {
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'primary', size = 'md', isLoading, children, disabled, ...props }, ref) => {
+  ({ className, variant = 'primary', size = 'md', isLoading, href, children, disabled, ...props }, ref) => {
+    const classes = cn(
+      'relative inline-flex items-center justify-center font-semibold rounded-xl',
+      'transition-all duration-200 ease-out',
+      'hover:-translate-y-0.5 active:translate-y-0',
+      'disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0',
+      'focus-visible:outline-2 focus-visible:outline-accent/50',
+      variants[variant],
+      sizes[size],
+      className
+    );
+
+    if (href) {
+      return (
+        <Link href={href} className={classes}>
+          {children}
+        </Link>
+      );
+    }
+
     return (
       <button
         ref={ref}
         disabled={disabled || isLoading}
-        className={cn(
-          'relative inline-flex items-center justify-center font-semibold rounded-xl',
-          'transition-all duration-200 ease-out',
-          'hover:-translate-y-0.5 active:translate-y-0',
-          'disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0',
-          'focus-visible:outline-2 focus-visible:outline-accent/50',
-          variants[variant],
-          sizes[size],
-          className
-        )}
+        className={classes}
         {...props}
       >
         {isLoading && (

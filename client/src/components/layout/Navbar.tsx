@@ -176,16 +176,12 @@ export default function Navbar() {
                 </>
               ) : (
                 <>
-                  <Link href="/auth/login" className="outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-full">
-                    <button className="px-5 py-2 text-sm font-bold text-text-primary hover:text-accent transition-all duration-300 rounded-full border border-border-default hover:border-accent/40 bg-white/5 hover:bg-white/10 backdrop-blur-md shadow-sm">
-                      Login
-                    </button>
+                  <Link href="/auth/login" className="inline-flex items-center px-5 py-2 text-sm font-bold text-text-primary hover:text-accent transition-all duration-300 rounded-full border border-border-default hover:border-accent/40 bg-white/5 hover:bg-white/10 backdrop-blur-md shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-accent">
+                    Login
                   </Link>
                   <MagneticButton>
-                    <Link href="/auth/register" className="outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-full block">
-                      <button className="px-6 py-2 text-sm font-bold rounded-full bg-gradient-to-r from-accent to-teal-400 text-white shadow-[0_0_15px_rgba(20,184,166,0.3)] hover:shadow-[0_0_25px_rgba(20,184,166,0.5)] transition-all duration-300 hover:scale-105">
-                        Register
-                      </button>
+                    <Link href="/auth/register" className="inline-flex items-center px-6 py-2 text-sm font-bold rounded-full bg-gradient-to-r from-accent to-teal-400 text-white shadow-[0_0_15px_rgba(20,184,166,0.3)] hover:shadow-[0_0_25px_rgba(20,184,166,0.5)] transition-all duration-300 hover:scale-105">
+                      Register
                     </Link>
                   </MagneticButton>
                 </>

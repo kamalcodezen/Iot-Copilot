@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import Link from 'next/link';
 import { Plus, FolderKanban } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import ProjectCard from '@/features/projects/components/ProjectCard';
@@ -54,9 +53,7 @@ export default function ProjectsPage() {
           <h1 className="text-2xl font-bold text-text-primary">My Projects</h1>
           <p className="text-sm text-text-tertiary mt-1">Manage your IoT projects</p>
         </div>
-        <Link href="/projects/new">
-          <Button><Plus size={16} className="mr-2" />New Project</Button>
-        </Link>
+        <Button href="/projects/new"><Plus size={16} className="mr-2" />New Project</Button>
       </div>
 
       <ProjectFilters onFilter={setFilters} />
@@ -68,7 +65,7 @@ export default function ProjectsPage() {
           <FolderKanban className="w-14 h-14 text-text-muted mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-text-primary mb-2">No projects yet</h3>
           <p className="text-sm text-text-tertiary mb-6">Create your first IoT project to get started</p>
-          <Link href="/projects/new"><Button><Plus size={16} className="mr-2" />Create Project</Button></Link>
+          <Button href="/projects/new"><Plus size={16} className="mr-2" />Create Project</Button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

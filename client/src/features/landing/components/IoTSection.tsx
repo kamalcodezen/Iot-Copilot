@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion';
 import { Radio, Wifi, Bluetooth, Satellite, Signal, EthernetPort, ArrowRight } from 'lucide-react';
-import Link from 'next/link';
 import Button from '@/components/ui/Button';
 
 const protocols = [
@@ -120,11 +119,9 @@ export default function IoTSection() {
               ))}
             </div>
             <div className="mt-4 pt-4 border-t border-border-default">
-              <Link href="/explore">
-                <Button variant="ghost" size="sm" className="w-full justify-between">
-                  View Device Dashboard <ArrowRight size={13} />
-                </Button>
-              </Link>
+              <Button href="/explore" variant="ghost" size="sm" className="w-full justify-between">
+                View Device Dashboard <ArrowRight size={13} />
+              </Button>
             </div>
           </motion.div>
         </div>

@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion';
 import { ArrowRight, Sparkles } from 'lucide-react';
-import Link from 'next/link';
 import Button from '@/components/ui/Button';
 
 export default function CTA() {
@@ -33,16 +32,12 @@ export default function CTA() {
               Join thousands of engineers using AI to design, debug, and deploy IoT systems. Start building in minutes — no setup required.
             </p>
             <div className="flex items-center justify-center gap-3 sm:gap-4 flex-wrap">
-              <Link href="/auth/register">
-                <Button size="lg" className="text-sm">
-                  Start Building Free <ArrowRight size={15} />
-                </Button>
-              </Link>
-              <Link href="/explore">
-                <Button variant="outline" size="lg" className="text-sm">
-                  Explore Projects
-                </Button>
-              </Link>
+              <Button href="/auth/register" size="lg" className="text-sm">
+                Start Building Free <ArrowRight size={15} />
+              </Button>
+              <Button href="/explore" variant="outline" size="lg" className="text-sm">
+                Explore Projects
+              </Button>
             </div>
             <p className="text-xs font-semibold text-text-muted mt-5">No credit card required &middot; Free tier includes 100 AI generations/month</p>
           </div>

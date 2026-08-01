@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import Link from 'next/link';
 import { ArrowRight, Sparkles, Radio, Activity, Globe, Monitor, Gauge } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import Button from '@/components/ui/Button';
@@ -100,18 +99,14 @@ export default function Hero() {
               transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
               className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 mb-12"
             >
-              <Link href={getStartedHref}>
-                <Button size="lg" className="rounded-full px-8 py-3.5 shadow-lg shadow-accent/20 group text-base w-full sm:w-auto justify-center">
-                  Start Building Free
-                  <ArrowRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Link>
-              <Link href="#features">
-                <Button variant="outline" size="lg" className="rounded-full px-8 py-3.5 border-border-default text-text-secondary hover:border-accent/30 hover:text-accent w-full sm:w-auto justify-center">
-                  <Sparkles size={16} className="mr-2" />
-                  Explore Platform
-                </Button>
-              </Link>
+              <Button href={getStartedHref} size="lg" className="rounded-full px-8 py-3.5 shadow-lg shadow-accent/20 group text-base w-full sm:w-auto justify-center">
+                Start Building Free
+                <ArrowRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+              <Button href="#features" variant="outline" size="lg" className="rounded-full px-8 py-3.5 border-border-default text-text-secondary hover:border-accent/30 hover:text-accent w-full sm:w-auto justify-center">
+                <Sparkles size={16} className="mr-2" />
+                Explore Platform
+              </Button>
             </motion.div>
 
             <motion.div

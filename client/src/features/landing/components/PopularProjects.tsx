@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion';
 import { Cpu, Thermometer, Camera, Car, Wifi, Lightbulb, ArrowRight, GitFork, Star } from 'lucide-react';
-import Link from 'next/link';
 import Button from '@/components/ui/Button';
 
 const projects = [
@@ -126,11 +125,9 @@ export default function PopularProjects() {
           viewport={{ once: true }}
           className="text-center mt-10"
         >
-          <Link href="/explore">
-            <Button variant="outline">
-              Browse All Projects <ArrowRight size={15} />
-            </Button>
-          </Link>
+          <Button href="/explore" variant="outline">
+            Browse All Projects <ArrowRight size={15} />
+          </Button>
         </motion.div>
       </div>
     </section>

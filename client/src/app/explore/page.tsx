@@ -7,7 +7,6 @@ import ProjectFilters from '@/features/projects/components/ProjectFilters';
 import IoTLoader from '@/components/ui/IoTLoader';
 import PageHeader from '@/components/layout/PageHeader';
 import ErrorState from '@/components/layout/ErrorState';
-import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import { getCommunityProjects } from '@/lib/api/community';
 import { PopulatedProject } from '@/types';
@@ -53,7 +52,7 @@ export default function ExplorePage() {
           </div>
           <h3 className="text-lg font-bold text-text-primary mb-2">No projects found</h3>
           <p className="text-sm font-semibold text-text-tertiary mb-6">Be the first to share your IoT project!</p>
-          <Link href="/projects/new"><Button><Plus size={16} className="mr-2" />Create Project</Button></Link>
+          <Button href="/projects/new"><Plus size={16} className="mr-2" />Create Project</Button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">

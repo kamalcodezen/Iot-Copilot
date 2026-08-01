@@ -66,7 +66,7 @@ export default function ProjectDetailPage() {
           <ArrowLeft size={15} /> Back to Projects
         </Link>
         <div className="flex items-center gap-2">
-          <Link href={`/projects/${project._id}/edit`}><Button variant="secondary" size="sm"><Edit size={15} className="mr-1" /> Edit</Button></Link>
+          <Button href={`/projects/${project._id}/edit`} variant="secondary" size="sm"><Edit size={15} className="mr-1" /> Edit</Button>
           <Button variant="danger" size="sm" onClick={handleDelete}><Trash2 size={15} className="mr-1" /> Delete</Button>
         </div>
       </div>
