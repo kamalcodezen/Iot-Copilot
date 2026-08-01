@@ -46,7 +46,7 @@ export default function ProjectCard({ project, onDelete, isOwner }: ProjectCardP
 
       <Link href={`/projects/${project._id}`} className="block">
         <div className="flex items-center gap-1.5 mb-3 flex-wrap">
-          <Badge variant={project.status === 'completed' ? 'success' : project.status === 'in-progress' ? 'info' : project.status === 'paused' ? 'warning' : 'default'} size="sm">{project.status}</Badge>
+          <Badge variant={project.status === 'completed' ? 'success' : project.status === 'in-progress' ? 'accent' : project.status === 'paused' ? 'warning' : 'default'} size="sm">{project.status}</Badge>
           <Badge variant={project.difficulty === 'beginner' ? 'success' : project.difficulty === 'intermediate' ? 'warning' : 'error'} size="sm">{project.difficulty}</Badge>
           <Badge variant="default" size="sm">{project.category}</Badge>
         </div>

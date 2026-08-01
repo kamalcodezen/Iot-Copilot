@@ -109,7 +109,7 @@ export default function AdminUsersPage() {
                         </select>
                       </div>
                     </td>
-                    <td className="p-4"><Badge variant="info" size="sm">{user.skillLevel}</Badge></td>
+                    <td className="p-4"><Badge variant="accent" size="sm">{user.skillLevel}</Badge></td>
                     <td className="p-4 text-sm text-text-secondary">{formatDate(user.createdAt)}</td>
                     <td className="p-4 text-right">
                       <button onClick={() => handleDelete(user.id)} className="p-1.5 rounded-xl text-text-muted hover:text-error hover:bg-error/10 transition-all duration-200"><Trash2 size={16} /></button>

@@ -66,7 +66,7 @@ export default function ProjectProgress({ projects }: ProjectProgressProps) {
               <div className="flex items-start justify-between gap-2 mb-2.5">
                 <h4 className="text-sm font-bold text-text-primary group-hover:text-accent transition-colors truncate">{project.title}</h4>
                 <Badge
-                  variant={project.status === 'completed' ? 'success' : project.status === 'in-progress' ? 'info' : project.status === 'paused' ? 'warning' : 'default'}
+                  variant={project.status === 'completed' ? 'success' : project.status === 'in-progress' ? 'accent' : project.status === 'paused' ? 'warning' : 'default'}
                   size="sm"
                   className="shrink-0"
                   dot

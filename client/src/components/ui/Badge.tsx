@@ -4,7 +4,7 @@ import { cn } from '@/utils/cn';
 
 interface BadgeProps {
   children: React.ReactNode;
-  variant?: 'default' | 'success' | 'warning' | 'error' | 'info' | 'accent';
+  variant?: 'default' | 'success' | 'warning' | 'error' | 'accent';
   size?: 'sm' | 'md';
   className?: string;
   dot?: boolean;
@@ -15,7 +15,6 @@ const variants = {
   success: 'bg-success-light text-success border-success/30',
   warning: 'bg-warning-light text-warning border-warning/30',
   error: 'bg-error-light text-error border-error/30',
-  info: 'bg-accent-light text-accent border-accent/30',
   accent: 'bg-accent-light text-accent border-accent/30',
 };
 
@@ -35,7 +34,7 @@ export default function Badge({ children, variant = 'default', size = 'sm', clas
           variant === 'success' ? 'bg-success animate-status-blink' :
           variant === 'warning' ? 'bg-warning animate-status-blink' :
           variant === 'error' ? 'bg-error animate-status-blink' :
-          variant === 'info' || variant === 'accent' ? 'bg-accent animate-pulse-soft' :
+          variant === 'accent' ? 'bg-accent animate-pulse-soft' :
           'bg-text-muted'
         )} />
       )}
