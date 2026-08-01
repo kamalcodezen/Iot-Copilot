@@ -12,12 +12,16 @@ export const getActivities = asyncHandler(async (req: AuthRequest, res: Response
   const { id: userId } = requireUser(req);
   const { page, limit } = paginationSchema.parse(req.query);
 
-  const activities = await Activity.find({ userId })
-    .sort({ createdAt: -1 })
-    .skip((page - 1) * limit)
-    .limit(limit);
-
-  const total = await Activity.countDocuments({ userId });
+  // Find and count are independent, so run them at the same time
+  // instead of waiting for one to finish before starting the other.
+  const [activities, total] = await Promise.all([
+    Activity.find({ userId })
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .exec(),
+    Activity.countDocuments({ userId }),
+  ]);
 
   sendPaginated(res, activities, page, limit, total);
 });
@@ -25,27 +29,30 @@ export const getActivities = asyncHandler(async (req: AuthRequest, res: Response
 export const getStats = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id: userId } = requireUser(req);
 
-  const user = await getUserById(userId);
-  const totalProjects = await Project.countDocuments({ userId });
-  const completedProjects = await Project.countDocuments({ userId, status: 'completed' });
-  const inProgressProjects = await Project.countDocuments({ userId, status: 'in-progress' });
-
-  // One data point per day for the last 30 days, used for the activity chart.
+  // All of these queries are independent, so run them at the same time
+  // instead of one after another.
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-  const dailyActivity = await Activity.aggregate<{ _id: string; count: number }>([
-    {
-      $match: {
-        userId,
-        createdAt: { $gte: thirtyDaysAgo },
+
+  const [user, totalProjects, completedProjects, inProgressProjects, dailyActivity] = await Promise.all([
+    getUserById(userId),
+    Project.countDocuments({ userId }),
+    Project.countDocuments({ userId, status: 'completed' }),
+    Project.countDocuments({ userId, status: 'in-progress' }),
+    Activity.aggregate<{ _id: string; count: number }>([
+      {
+        $match: {
+          userId,
+          createdAt: { $gte: thirtyDaysAgo },
+        },
       },
-    },
-    {
-      $group: {
-        _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
-        count: { $sum: 1 },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+          count: { $sum: 1 },
+        },
       },
-    },
-    { $sort: { _id: 1 } },
+      { $sort: { _id: 1 } },
+    ]).exec(),
   ]);
 
   const totals = { totalProjects, completedProjects, inProgressProjects };

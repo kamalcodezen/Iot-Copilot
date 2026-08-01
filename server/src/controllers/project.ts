@@ -57,12 +57,16 @@ export const getProjects = asyncHandler(async (req: AuthRequest, res: Response) 
   if (category) query.category = category;
   if (difficulty) query.difficulty = difficulty;
 
-  const projects = await Project.find(query)
-    .sort({ updatedAt: -1 })
-    .skip((page - 1) * limit)
-    .limit(limit);
-
-  const total = await Project.countDocuments(query);
+  // Find and count are independent, so run them at the same time
+  // instead of waiting for one to finish before starting the other.
+  const [projects, total] = await Promise.all([
+    Project.find(query)
+      .sort({ updatedAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .exec(),
+    Project.countDocuments(query),
+  ]);
 
   sendPaginated(res, projects, page, limit, total);
 });
