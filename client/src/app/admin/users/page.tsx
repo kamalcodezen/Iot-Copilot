@@ -66,7 +66,7 @@ export default function AdminUsersPage() {
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={16} />
-        <input type="text" placeholder="Search users..." value={search} onChange={(e) => setSearch(e.target.value)}
+        <input type="text" placeholder="Search users..." value={search} onChange={(e) => setSearch(e.target.value)} aria-label="Search users"
           className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-border-default bg-bg-elevated text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/25 focus:border-accent/40 transition-all duration-200 shadow-elevation-low" />
       </div>
 
@@ -112,7 +112,7 @@ export default function AdminUsersPage() {
                     <td className="p-4"><Badge variant="accent" size="sm">{user.skillLevel}</Badge></td>
                     <td className="p-4 text-sm text-text-secondary">{formatDate(user.createdAt)}</td>
                     <td className="p-4 text-right">
-                      <button onClick={() => handleDelete(user.id)} className="p-1.5 rounded-xl text-text-muted hover:text-error hover:bg-error/10 transition-all duration-200"><Trash2 size={16} /></button>
+                      <button onClick={() => handleDelete(user.id)} aria-label={`Delete user ${user.name}`} className="p-1.5 rounded-xl text-text-muted hover:text-error hover:bg-error/10 transition-all duration-200"><Trash2 size={16} /></button>
                     </td>
                   </motion.tr>
                 ))}

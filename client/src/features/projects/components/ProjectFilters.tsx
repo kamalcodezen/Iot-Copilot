@@ -33,7 +33,7 @@ export default function ProjectFilters({ onFilter }: ProjectFiltersProps) {
       <div className="flex items-center gap-2 sm:gap-3">
         <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" size={16} />
-          <input type="text" placeholder="Search projects..." value={filters.search} onChange={(e) => handleChange('search', e.target.value)}
+          <input type="text" placeholder="Search projects..." value={filters.search} onChange={(e) => handleChange('search', e.target.value)} aria-label="Search projects"
             className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-border-default bg-bg-elevated text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 transition-all duration-200 shadow-elevation-low" />
         </div>
         <button onClick={() => setShowAdvanced(!showAdvanced)}
@@ -42,7 +42,7 @@ export default function ProjectFilters({ onFilter }: ProjectFiltersProps) {
           )} aria-label={showAdvanced ? 'Hide advanced filters' : 'Show advanced filters'} aria-expanded={showAdvanced}
         ><SlidersHorizontal size={16} /></button>
         {hasFilters && (
-          <button onClick={clearFilters}
+          <button onClick={clearFilters} aria-label="Clear filters"
             className="flex items-center justify-center h-10 w-10 rounded-xl border border-border-default text-text-muted hover:text-text-primary hover:bg-bg-surface transition-all shrink-0 touch-target shadow-elevation-low"
           ><X size={16} /></button>
         )}

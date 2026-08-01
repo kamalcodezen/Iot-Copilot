@@ -41,6 +41,7 @@ export default function ChatInput({ onSend, disabled, placeholder }: ChatInputPr
           onKeyDown={handleKeyDown}
           onInput={handleInput}
           placeholder={placeholder}
+          aria-label={placeholder || 'Message'}
           rows={1}
           disabled={disabled}
           className="flex-1 bg-transparent text-sm text-text-primary placeholder-text-muted resize-none focus:outline-none px-3 py-2 max-h-[200px] scrollbar-thin rounded-xl shadow-elevation-low"
@@ -48,6 +49,7 @@ export default function ChatInput({ onSend, disabled, placeholder }: ChatInputPr
         <button
           onClick={handleSubmit}
           disabled={disabled || !input.trim()}
+          aria-label="Send message"
           className={cn(
             'w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-all font-bold',
             input.trim() && !disabled

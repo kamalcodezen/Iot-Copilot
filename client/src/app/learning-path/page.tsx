@@ -84,16 +84,16 @@ export default function LearningPathPage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div className="space-y-1.5">
-            <label className="text-sm font-bold text-text-secondary">Skill Level</label>
-            <select value={skillLevel} onChange={(e) => setSkillLevel(e.target.value)} className="w-full rounded-xl border border-border-default bg-bg-elevated px-4 py-2.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-accent/25 focus:border-accent/40 transition-all duration-200 shadow-elevation-low">
+            <label htmlFor="skill-level" className="text-sm font-bold text-text-secondary">Skill Level</label>
+            <select id="skill-level" value={skillLevel} onChange={(e) => setSkillLevel(e.target.value)} className="w-full rounded-xl border border-border-default bg-bg-elevated px-4 py-2.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-accent/25 focus:border-accent/40 transition-all duration-200 shadow-elevation-low">
               <option value="beginner">Beginner</option>
               <option value="intermediate">Intermediate</option>
               <option value="advanced">Advanced</option>
             </select>
           </div>
           <div className="space-y-1.5">
-            <label className="text-sm font-bold text-text-secondary">Goals (optional)</label>
-            <input value={goals} onChange={(e) => setGoals(e.target.value)} placeholder="e.g., Build a smart home system" className="w-full rounded-xl border border-border-default bg-bg-elevated px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/25 focus:border-accent/40 transition-all duration-200 shadow-elevation-low" />
+            <label htmlFor="goals" className="text-sm font-bold text-text-secondary">Goals (optional)</label>
+            <input id="goals" value={goals} onChange={(e) => setGoals(e.target.value)} placeholder="e.g., Build a smart home system" className="w-full rounded-xl border border-border-default bg-bg-elevated px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/25 focus:border-accent/40 transition-all duration-200 shadow-elevation-low" />
           </div>
         </div>
 

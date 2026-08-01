@@ -106,6 +106,8 @@ export default function Testimonials() {
                   <button
                     key={i}
                     onClick={() => setActive(i)}
+                    aria-label={`Show testimonial ${i + 1}`}
+                    aria-current={i === active ? 'true' : undefined}
                     className={`h-1.5 rounded-full transition-all duration-300 ${
                       i === active ? 'w-6 bg-accent' : 'w-1.5 bg-text-muted/30'
                     }`}
@@ -113,10 +115,10 @@ export default function Testimonials() {
                 ))}
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={prev} className="h-8 w-8 rounded-lg bg-bg-surface border border-border-default flex items-center justify-center hover:bg-bg-secondary transition-colors">
+                <button onClick={prev} aria-label="Previous testimonial" className="h-8 w-8 rounded-lg bg-bg-surface border border-border-default flex items-center justify-center hover:bg-bg-secondary transition-colors">
                   <ChevronLeft size={14} className="text-text-secondary" />
                 </button>
-                <button onClick={next} className="h-8 w-8 rounded-lg bg-bg-surface border border-border-default flex items-center justify-center hover:bg-bg-secondary transition-colors">
+                <button onClick={next} aria-label="Next testimonial" className="h-8 w-8 rounded-lg bg-bg-surface border border-border-default flex items-center justify-center hover:bg-bg-secondary transition-colors">
                   <ChevronRight size={14} className="text-text-secondary" />
                 </button>
               </div>

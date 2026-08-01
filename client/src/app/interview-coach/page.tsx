@@ -77,8 +77,8 @@ export default function InterviewCoachPage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
           <div className="space-y-1.5">
-            <label className="text-sm font-bold text-text-secondary">Experience Level</label>
-            <select value={experienceLevel} onChange={(e) => setExperienceLevel(e.target.value)} className="w-full rounded-xl border border-border-default bg-bg-elevated px-4 py-2.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-accent/25 focus:border-accent/40 transition-all duration-200 shadow-elevation-low">
+            <label htmlFor="experience-level" className="text-sm font-bold text-text-secondary">Experience Level</label>
+            <select id="experience-level" value={experienceLevel} onChange={(e) => setExperienceLevel(e.target.value)} className="w-full rounded-xl border border-border-default bg-bg-elevated px-4 py-2.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-accent/25 focus:border-accent/40 transition-all duration-200 shadow-elevation-low">
               <option value="fresher">Fresher / Entry Level</option>
               <option value="intermediate">Intermediate</option>
               <option value="senior">Senior</option>
@@ -108,8 +108,8 @@ export default function InterviewCoachPage() {
             <p className="text-base font-bold text-text-primary mb-5">{questions[currentQ]}</p>
 
             <div className="space-y-1.5 mb-4">
-              <label className="text-sm font-bold text-text-secondary">Your Answer</label>
-              <textarea value={answer} onChange={(e) => setAnswer(e.target.value)} rows={5} placeholder="Type your answer here..." className="w-full rounded-xl border border-border-default bg-bg-elevated px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 transition-all duration-200 shadow-elevation-low" />
+              <label htmlFor="answer" className="text-sm font-bold text-text-secondary">Your Answer</label>
+              <textarea id="answer" value={answer} onChange={(e) => setAnswer(e.target.value)} rows={5} placeholder="Type your answer here..." className="w-full rounded-xl border border-border-default bg-bg-elevated px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 transition-all duration-200 shadow-elevation-low" />
             </div>
 
             <div className="flex gap-3">

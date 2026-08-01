@@ -167,6 +167,7 @@ export default function AIAssistant() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask your IoT Copilot..."
+                aria-label="Ask your IoT Copilot"
                 className="flex-1 bg-bg-elevated border border-border-default rounded-full px-4 py-2.5 text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent/60 focus:ring-2 focus:ring-accent/20 transition-all"
               />
               <motion.button

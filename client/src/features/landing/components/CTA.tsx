@@ -33,7 +33,7 @@ export default function CTA() {
               Join thousands of engineers using AI to design, debug, and deploy IoT systems. Start building in minutes — no setup required.
             </p>
             <div className="flex items-center justify-center gap-3 sm:gap-4 flex-wrap">
-              <Link href="/register">
+              <Link href="/auth/register">
                 <Button size="lg" className="text-sm">
                   Start Building Free <ArrowRight size={15} />
                 </Button>

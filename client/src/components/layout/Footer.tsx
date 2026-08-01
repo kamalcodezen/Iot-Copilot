@@ -35,16 +35,16 @@ export default function Footer() {
               AI-powered IoT development platform. Design, debug, and deploy connected devices at enterprise scale.
             </p>
             <div className="flex items-center gap-2">
-              <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="h-8 w-8 rounded-lg bg-bg-surface border border-border-default flex items-center justify-center hover:bg-accent/10 hover:border-accent/30 transition-all duration-200">
+              <a href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="GitHub" className="h-8 w-8 rounded-lg bg-bg-surface border border-border-default flex items-center justify-center hover:bg-accent/10 hover:border-accent/30 transition-all duration-200">
                 <Github size={14} className="text-text-secondary" />
               </a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="h-8 w-8 rounded-lg bg-bg-surface border border-border-default flex items-center justify-center hover:bg-accent/10 hover:border-accent/30 transition-all duration-200">
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter / X" className="h-8 w-8 rounded-lg bg-bg-surface border border-border-default flex items-center justify-center hover:bg-accent/10 hover:border-accent/30 transition-all duration-200">
                 <Twitter size={14} className="text-text-secondary" />
               </a>
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="h-8 w-8 rounded-lg bg-bg-surface border border-border-default flex items-center justify-center hover:bg-accent/10 hover:border-accent/30 transition-all duration-200">
+              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="h-8 w-8 rounded-lg bg-bg-surface border border-border-default flex items-center justify-center hover:bg-accent/10 hover:border-accent/30 transition-all duration-200">
                 <Linkedin size={14} className="text-text-secondary" />
               </a>
-              <a href="mailto:hello@iotcopilot.com" className="h-8 w-8 rounded-lg bg-bg-surface border border-border-default flex items-center justify-center hover:bg-accent/10 hover:border-accent/30 transition-all duration-200">
+              <a href="mailto:hello@iotcopilot.com" aria-label="Email us" className="h-8 w-8 rounded-lg bg-bg-surface border border-border-default flex items-center justify-center hover:bg-accent/10 hover:border-accent/30 transition-all duration-200">
                 <Mail size={14} className="text-text-secondary" />
               </a>
             </div>

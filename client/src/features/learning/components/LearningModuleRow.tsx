@@ -28,6 +28,9 @@ export default function LearningModuleRow({ module, index, total, onToggle }: Le
             const nextStatus = module.status === 'completed' ? 'available' : 'completed';
             onToggle(index, nextStatus);
           }}
+          disabled={module.status === 'locked'}
+          aria-label={module.status === 'locked' ? `Module ${module.order} locked` : module.status === 'completed' ? `Mark module ${module.order} as not completed` : `Mark module ${module.order} as completed`}
+          aria-pressed={module.status === 'completed'}
           className={`relative z-10 transition-all ${module.status === 'locked' ? 'cursor-not-allowed' : 'cursor-pointer'}`}
         >
           {module.status === 'completed' ? (
