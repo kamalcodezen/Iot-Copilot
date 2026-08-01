@@ -10,7 +10,7 @@ import {
 } from '../controllers/project';
 import { authenticate } from '../middlewares/auth';
 import { validate } from '../middlewares/validate';
-import { mongoIdParams, projectSchema, projectUpdateSchema, progressSchema, projectQuerySchema } from "../validators";
+import { mongoIdParams, projectSchema, projectUpdateSchema, progressSchema, projectQuerySchema } from '../validators';
 
 const router = Router();
 

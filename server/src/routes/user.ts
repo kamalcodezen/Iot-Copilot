@@ -3,7 +3,7 @@ import multer from 'multer';
 import { getProfile, updateProfile, uploadAvatar, getUserProjects, getUserBadges } from '../controllers/user';
 import { authenticate } from '../middlewares/auth';
 import { validate } from '../middlewares/validate';
-import { mongoIdParams, updateProfileSchema } from "../validators";
+import { mongoIdParams, updateProfileSchema } from '../validators';
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });

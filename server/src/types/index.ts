@@ -18,4 +18,11 @@ export interface AIRequest {
   experienceLevel?: 'fresher' | 'intermediate' | 'senior';
   topic?: string;
   answer?: string;
+  goals?: string;
+  project?: string;
+  budget?: string;
+  idea?: string;
+  page?: string;
+  pageInfo?: string;
+  question?: string;
 }

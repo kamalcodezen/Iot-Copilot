@@ -1,154 +1,155 @@
 import { Response } from 'express';
-import mongoose from 'mongoose';
-import Project from '../models/Project';
+import type { FilterQuery } from 'mongoose';
+import Project, { IProject } from '../models/Project';
 import Activity from '../models/Activity';
 import { AuthRequest } from '../types';
 import { asyncHandler } from '../middlewares/asyncHandler';
+import { requireUser } from '../utils/request';
+import { markUserActive, addUserStat } from '../services/user';
+import { mongoIdParams, projectQuerySchema } from '../validators';
 
 export const getProjects = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const search = req.query.search as string;
-    const status = req.query.status as string;
-    const category = req.query.category as string;
-    const difficulty = req.query.difficulty as string;
+  const { id: userId } = requireUser(req);
+  const { page, limit, search, status, category, difficulty } = projectQuerySchema.parse(req.query);
 
-    const query: any = { userId: req.user!.id };
+  const query: FilterQuery<IProject> = { userId };
+  if (search) query.$text = { $search: search };
+  if (status) query.status = status;
+  if (category) query.category = category;
+  if (difficulty) query.difficulty = difficulty;
 
-    if (search) query.$text = { $search: search };
-    if (status) query.status = status;
-    if (category) query.category = category;
-    if (difficulty) query.difficulty = difficulty;
+  const projects = await Project.find(query)
+    .sort({ updatedAt: -1 })
+    .skip((page - 1) * limit)
+    .limit(limit);
 
-    const projects = await Project.find(query)
-      .sort({ updatedAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit);
+  const total = await Project.countDocuments(query);
 
-    const total = await Project.countDocuments(query);
-
-    res.json({
-      success: true,
-      data: projects,
-      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
-    });
+  res.json({
+    success: true,
+    data: projects,
+    pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+  });
 });
 
 export const getProject = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const project = await Project.findById(req.params.id);
+  const { id: userId } = requireUser(req);
+  const { id } = mongoIdParams.parse(req.params);
+  const project = await Project.findById(id);
 
-    if (!project) {
-      res.status(404).json({ success: false, message: 'Project not found' });
-      return;
-    }
+  if (!project) {
+    res.status(404).json({ success: false, message: 'Project not found' });
+    return;
+  }
 
-    if (project.userId.toString() !== req.user!.id && !project.isPublic) {
-      res.status(403).json({ success: false, message: 'Not authorized' });
-      return;
-    }
+  if (project.userId !== userId && !project.isPublic) {
+    res.status(403).json({ success: false, message: 'Not authorized' });
+    return;
+  }
 
-    res.json({ success: true, data: project });
+  res.json({ success: true, data: project });
 });
 
 export const createProject = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const project = await Project.create({
-      ...req.body,
-      userId: req.user!.id,
-    });
+  const { id: userId } = requireUser(req);
 
-    await mongoose.connection.db?.collection('user').updateOne(
-      { id: req.user!.id },
-      { $inc: { totalProjects: 1 }, $set: { lastActive: new Date() } }
-    );
+  const project = await Project.create({
+    ...req.body,
+    userId,
+  });
 
-    await Activity.create({
-      userId: req.user!.id,
-      type: 'project_created',
-      description: `Created project: ${project.title}`,
-      metadata: { projectId: project._id },
-    });
+  await markUserActive(userId);
+  await addUserStat(userId, 'totalProjects', 1);
+  await Activity.create({
+    userId,
+    type: 'project_created',
+    description: `Created project: ${project.title}`,
+    metadata: { projectId: project._id },
+  });
 
-    res.status(201).json({ success: true, data: project });
+  res.status(201).json({ success: true, data: project });
 });
 
 export const updateProject = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const project = await Project.findById(req.params.id);
+  const { id: userId } = requireUser(req);
+  const { id } = mongoIdParams.parse(req.params);
+  const project = await Project.findById(id);
 
-    if (!project) {
-      res.status(404).json({ success: false, message: 'Project not found' });
-      return;
-    }
+  if (!project) {
+    res.status(404).json({ success: false, message: 'Project not found' });
+    return;
+  }
 
-    if (project.userId.toString() !== req.user!.id) {
-      res.status(403).json({ success: false, message: 'Not authorized' });
-      return;
-    }
+  if (project.userId !== userId) {
+    res.status(403).json({ success: false, message: 'Not authorized' });
+    return;
+  }
 
-    const updated = await Project.findByIdAndUpdate(req.params.id, req.body, { new: true });
-
-    res.json({ success: true, data: updated });
+  const updated = await Project.findByIdAndUpdate(id, req.body, { new: true });
+  res.json({ success: true, data: updated });
 });
 
 export const deleteProject = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const project = await Project.findById(req.params.id);
+  const user = requireUser(req);
+  const { id } = mongoIdParams.parse(req.params);
+  const project = await Project.findById(id);
 
-    if (!project) {
-      res.status(404).json({ success: false, message: 'Project not found' });
-      return;
-    }
+  if (!project) {
+    res.status(404).json({ success: false, message: 'Project not found' });
+    return;
+  }
 
-    if (project.userId.toString() !== req.user!.id && req.user!.role !== 'admin') {
-      res.status(403).json({ success: false, message: 'Not authorized' });
-      return;
-    }
+  if (project.userId !== user.id && user.role !== 'admin') {
+    res.status(403).json({ success: false, message: 'Not authorized' });
+    return;
+  }
 
-    await Project.findByIdAndDelete(req.params.id);
-
-    res.json({ success: true, message: 'Project deleted' });
+  await Project.findByIdAndDelete(id);
+  res.json({ success: true, message: 'Project deleted' });
 });
 
 export const updateProgress = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const { progress } = req.body;
-    const project = await Project.findById(req.params.id);
+  const { id: userId } = requireUser(req);
+  const { id } = mongoIdParams.parse(req.params);
+  const project = await Project.findById(id);
 
-    if (!project) {
-      res.status(404).json({ success: false, message: 'Project not found' });
-      return;
-    }
+  if (!project) {
+    res.status(404).json({ success: false, message: 'Project not found' });
+    return;
+  }
 
-    if (project.userId.toString() !== req.user!.id) {
-      res.status(403).json({ success: false, message: 'Not authorized' });
-      return;
-    }
+  if (project.userId !== userId) {
+    res.status(403).json({ success: false, message: 'Not authorized' });
+    return;
+  }
 
-    project.progress = progress;
-    if (progress === 100) {
-      project.status = 'completed';
-      await mongoose.connection.db?.collection('user').updateOne(
-        { id: req.user!.id },
-        { $inc: { completedProjects: 1 } }
-      );
-      await Activity.create({
-        userId: req.user!.id,
-        type: 'project_completed',
-        description: `Completed project: ${project.title}`,
-        metadata: { projectId: project._id },
-      });
-    }
+  const progress = req.body.progress as number;
+  project.progress = progress;
+  if (progress === 100) {
+    project.status = 'completed';
+    await addUserStat(userId, 'completedProjects', 1);
+    await Activity.create({
+      userId,
+      type: 'project_completed',
+      description: `Completed project: ${project.title}`,
+      metadata: { projectId: project._id },
+    });
+  }
 
-    await project.save();
-    res.json({ success: true, data: project });
+  await project.save();
+  res.json({ success: true, data: project });
 });
 
 export const toggleLike = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const project = await Project.findById(req.params.id);
-    if (!project) {
-      res.status(404).json({ success: false, message: 'Project not found' });
-      return;
-    }
+  const { id } = mongoIdParams.parse(req.params);
+  const project = await Project.findById(id);
+  if (!project) {
+    res.status(404).json({ success: false, message: 'Project not found' });
+    return;
+  }
 
-    project.likes += 1;
-    await project.save();
+  project.likes += 1;
+  await project.save();
 
-    res.json({ success: true, data: { likes: project.likes } });
+  res.json({ success: true, data: { likes: project.likes } });
 });

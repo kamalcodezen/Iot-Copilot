@@ -1,12 +1,11 @@
 import { Response } from 'express';
-import mongoose from 'mongoose';
 import { AuthRequest, AIRequest } from '../types';
 import { asyncHandler } from '../middlewares/asyncHandler';
-import { generateContent, generateContentStream } from '../services/ai';
-import { detectLanguage } from '../services/language';
-import { saveMemory, getRecentMemory, getMemoryByType, buildContextString } from '../services/memory';
-import Activity from '../models/Activity';
+import { AppError } from '../utils/errors';
+import { requireUser } from '../utils/request';
 import {
+  generateContent,
+  generateContentStream,
   buildMentorPrompt,
   buildDebugPrompt,
   buildInterviewPrompt,
@@ -17,123 +16,96 @@ import {
   buildRecommendPrompt,
   buildAssistantPrompt,
 } from '../services/ai';
+import { detectLanguage } from '../services/language';
+import { saveMemory, getRecentMemory, getMemoryByType, buildContextString } from '../services/memory';
+import { getUserById, markUserActive, addUserStat } from '../services/user';
+import Activity from '../models/Activity';
 import LearningPath from '../models/LearningPath';
+
+// --- Server-Sent Events helpers -------------------------------------------------
+
+function setupSSE(res: Response) {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
+}
+
+function writeToken(res: Response, token: string) {
+  res.write(`event: token\ndata: ${JSON.stringify({ token })}\n\n`);
+}
+
+function writeSSEDone(res: Response, full: string) {
+  res.write(`event: done\ndata: ${JSON.stringify({ full })}\n\n`);
+  res.end();
+}
+
+function writeSSEError(res: Response, error: unknown) {
+  const message = error instanceof Error ? error.message : 'Something went wrong';
+  res.write(`event: error\ndata: ${JSON.stringify({ error: message })}\n\n`);
+  res.end();
+}
+
+// Streams the model's reply to the client token by token.
+// If streaming fails with a typed AI error (quota, config, provider), the
+// error propagates so the caller reports it — retrying would waste quota.
+// Any other failure falls back to a single non-streamed call.
+async function streamReply(res: Response, prompt: string): Promise<string> {
+  let fullResponse = '';
+  try {
+    for await (const chunk of generateContentStream(prompt)) {
+      fullResponse += chunk;
+      writeToken(res, chunk);
+    }
+  } catch (error) {
+    if (error instanceof AppError) throw error;
+    fullResponse = await generateContent(prompt);
+    writeToken(res, fullResponse);
+  }
+  return fullResponse;
+}
+
+function parseRoadmapResponse(response: string) {
+  try {
+    return JSON.parse(response.replace(/```json|```/g, '').trim());
+  } catch {
+    return [{ title: 'IoT Fundamentals', description: response, order: 1, resources: [], estimatedHours: 5 }];
+  }
+}
+
+// --- Streaming chat handlers ----------------------------------------------------
 
 export const aiChat = async (req: AuthRequest, res: Response) => {
   try {
+    const { id: userId } = requireUser(req);
     const { message, context, projectId } = req.body as AIRequest;
-    const userCol = mongoose.connection.db?.collection('user');
-    const user = userCol ? await userCol.findOne({ id: req.user!.id }) : null;
 
-    const recentMemory = await getRecentMemory(req.user!.id, 10);
-    const contextStr = buildContextString(recentMemory);
-    const prompt = buildMentorPrompt(message, user?.skillLevel || 'beginner', contextStr);
+    const user = await getUserById(userId);
+    const recentMemory = await getRecentMemory(userId, 10);
+    const prompt = buildMentorPrompt(message, user?.skillLevel || 'beginner', buildContextString(recentMemory));
 
-    await saveMemory(req.user!.id, 'mentor', 'user', message, { topic: context, projectId });
+    await saveMemory(userId, 'mentor', 'user', message, { topic: context, projectId });
+    setupSSE(res);
 
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    res.setHeader('X-Accel-Buffering', 'no');
+    const fullResponse = await streamReply(res, prompt);
 
-    let fullResponse = '';
+    await saveMemory(userId, 'mentor', 'assistant', fullResponse, { topic: context });
+    await markUserActive(userId);
+    await addUserStat(userId, 'totalSessions', 1);
+    await addUserStat(userId, 'totalHours', 0.1);
+    await Activity.create({ userId, type: 'mentor_session', description: 'Asked AI Mentor a question' });
 
-    try {
-      for await (const chunk of generateContentStream(prompt)) {
-        fullResponse += chunk;
-        res.write(`event: token\ndata: ${JSON.stringify({ token: chunk })}\n\n`);
-      }
-    } catch (streamError: any) {
-      if (streamError?.message?.startsWith('AI ')) throw streamError;
-      fullResponse = await generateContent(prompt);
-      res.write(`event: token\ndata: ${JSON.stringify({ token: fullResponse })}\n\n`);
-    }
-
-    await saveMemory(req.user!.id, 'mentor', 'assistant', fullResponse, { topic: context });
-
-    await mongoose.connection.db?.collection('user').updateOne(
-      { id: req.user!.id },
-      { $inc: { totalSessions: 1, totalHours: 0.1 }, $set: { lastActive: new Date() } }
-    );
-
-    await Activity.create({
-      userId: req.user!.id,
-      type: 'mentor_session',
-      description: 'Asked AI Mentor a question',
-    });
-
-    res.write(`event: done\ndata: ${JSON.stringify({ full: fullResponse })}\n\n`);
-    res.end();
-  } catch (error: any) {
-    res.write(`event: error\ndata: ${JSON.stringify({ error: error.message })}\n\n`);
-    res.end();
+    writeSSEDone(res, fullResponse);
+  } catch (error) {
+    writeSSEError(res, error);
   }
 };
 
-export const getChatHistory = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const memories = await getMemoryByType(req.user!.id, 'mentor', 50);
-    res.json({ success: true, data: memories });
-});
-
-export const generateRoadmap = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const { skillLevel, goals } = req.body;
-    const prompt = buildRoadmapPrompt(skillLevel || 'beginner', goals || '');
-    const response = await generateContent(prompt);
-
-    let modules;
-    try {
-      modules = JSON.parse(response.replace(/```json|```/g, '').trim());
-    } catch {
-      modules = [{ title: 'IoT Fundamentals', description: response, order: 1, resources: [], estimatedHours: 5 }];
-    }
-
-    const learningPath = await LearningPath.create({
-      userId: req.user!.id,
-      title: `IoT ${skillLevel || 'Beginner'} Roadmap`,
-      description: goals || 'Complete IoT learning journey',
-      level: skillLevel || 'beginner',
-      modules,
-      isActive: true,
-    });
-
-    await saveMemory(req.user!.id, 'roadmap', 'assistant', JSON.stringify(modules), { topic: 'roadmap' });
-
-    await Activity.create({
-      userId: req.user!.id,
-      type: 'roadmap_started',
-      description: `Generated ${skillLevel || 'beginner'} learning roadmap`,
-    });
-
-    res.json({ success: true, data: learningPath });
-});
-
-export const recommendComponents = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const { project, budget } = req.body;
-    const prompt = buildComponentPrompt(project, budget);
-    const response = await generateContent(prompt);
-
-    await saveMemory(req.user!.id, 'recommendation', 'assistant', response, {
-      topic: 'component_recommendation',
-    });
-
-    res.json({ success: true, data: response });
-});
-
-export const planProject = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const { idea, skillLevel } = req.body;
-    const prompt = buildProjectPlanPrompt(idea, skillLevel || 'beginner');
-    const response = await generateContent(prompt);
-
-    await saveMemory(req.user!.id, 'mentor', 'assistant', response, {
-      topic: 'project_plan',
-    });
-
-    res.json({ success: true, data: response });
-});
-
 export const aiDebug = async (req: AuthRequest, res: Response) => {
   try {
+    const { id: userId } = requireUser(req);
     const { message, board, components, error } = req.body as AIRequest;
+
     const prompt = buildDebugPrompt(
       message || '',
       board || '',
@@ -141,87 +113,21 @@ export const aiDebug = async (req: AuthRequest, res: Response) => {
       error || ''
     );
 
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    res.setHeader('X-Accel-Buffering', 'no');
+    setupSSE(res);
+    const fullResponse = await streamReply(res, prompt);
 
-    let fullResponse = '';
+    await saveMemory(userId, 'debug', 'assistant', fullResponse, { topic: 'debug_session' });
+    await Activity.create({ userId, type: 'debug_session', description: 'Used AI Debugger' });
 
-    try {
-      for await (const chunk of generateContentStream(prompt)) {
-        fullResponse += chunk;
-        res.write(`event: token\ndata: ${JSON.stringify({ token: chunk })}\n\n`);
-      }
-    } catch (streamError: any) {
-      if (streamError?.message?.startsWith('AI ')) throw streamError;
-      fullResponse = await generateContent(prompt);
-      res.write(`event: token\ndata: ${JSON.stringify({ token: fullResponse })}\n\n`);
-    }
-
-    await saveMemory(req.user!.id, 'debug', 'assistant', fullResponse, {
-      topic: 'debug_session',
-    });
-
-    await Activity.create({
-      userId: req.user!.id,
-      type: 'debug_session',
-      description: 'Used AI Debugger',
-    });
-
-    res.write(`event: done\ndata: ${JSON.stringify({ full: fullResponse })}\n\n`);
-    res.end();
-  } catch (error: any) {
-    res.write(`event: error\ndata: ${JSON.stringify({ error: error.message })}\n\n`);
-    res.end();
+    writeSSEDone(res, fullResponse);
+  } catch (error) {
+    writeSSEError(res, error);
   }
 };
 
-export const interviewQuestions = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const { experienceLevel, topic } = req.body;
-    const prompt = buildInterviewPrompt(experienceLevel || 'fresher', topic || 'General IoT');
-    const response = await generateContent(prompt);
-
-    await saveMemory(req.user!.id, 'interview', 'assistant', response, {
-      topic: 'interview_questions',
-    });
-
-    res.json({ success: true, data: response });
-});
-
-export const submitInterviewAnswer = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const { question, answer, experienceLevel } = req.body;
-    const prompt = buildInterviewFeedbackPrompt(question, answer, experienceLevel || 'fresher');
-    const response = await generateContent(prompt);
-
-    await saveMemory(req.user!.id, 'interview', 'assistant', response, {
-      topic: 'interview_feedback',
-    });
-
-    await Activity.create({
-      userId: req.user!.id,
-      type: 'interview_practice',
-      description: 'Practiced interview question',
-    });
-
-    res.json({ success: true, data: response });
-});
-
-export const recommendNext = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const recentMemories = await getRecentMemory(req.user!.id, 20);
-    const history = buildContextString(recentMemories);
-    const userCol = mongoose.connection.db?.collection('user');
-    const user = userCol ? await userCol.findOne({ id: req.user!.id }) : null;
-
-    const prompt = buildRecommendPrompt(history, user?.skillLevel || 'beginner');
-    const response = await generateContent(prompt);
-
-    res.json({ success: true, data: response });
-});
-
 export const assistantChat = async (req: AuthRequest, res: Response) => {
   try {
-    const { message, page, pageInfo } = req.body as { message: string; page?: string; pageInfo?: string };
+    const { message, page, pageInfo } = req.body as AIRequest;
     const userId = req.user?.id;
 
     let history = '';
@@ -237,38 +143,22 @@ export const assistantChat = async (req: AuthRequest, res: Response) => {
       await saveMemory(userId, 'mentor', 'user', message, { topic: 'assistant' });
     }
 
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    res.setHeader('X-Accel-Buffering', 'no');
+    setupSSE(res);
+    let fullResponse = await streamReply(res, prompt);
 
-    let fullResponse = '';
-
-    try {
-      for await (const chunk of generateContentStream(prompt)) {
-        fullResponse += chunk;
-        res.write(`event: token\ndata: ${JSON.stringify({ token: chunk })}\n\n`);
-      }
-    } catch (streamError: any) {
-      if (streamError?.message?.startsWith('AI ')) throw streamError;
+    // The model occasionally returns an empty reply on the first attempt.
+    if (!fullResponse.trim()) {
       fullResponse = await generateContent(prompt);
-      res.write(`event: token\ndata: ${JSON.stringify({ token: fullResponse })}\n\n`);
+      writeToken(res, fullResponse);
     }
 
     if (!fullResponse.trim()) {
-      fullResponse = await generateContent(prompt);
-      res.write(`event: token\ndata: ${JSON.stringify({ token: fullResponse })}\n\n`);
-    }
-
-    if (!fullResponse.trim()) {
-      res.write(`event: error\ndata: ${JSON.stringify({ error: 'The AI service returned an empty response. Please try again.' })}\n\n`);
-      res.end();
+      writeSSEError(res, new Error('The AI service returned an empty response. Please try again.'));
       return;
     }
 
     if (userId) {
       await saveMemory(userId, 'mentor', 'assistant', fullResponse, { topic: 'assistant' });
-
       await Activity.create({
         userId,
         type: 'mentor_session',
@@ -276,10 +166,95 @@ export const assistantChat = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    res.write(`event: done\ndata: ${JSON.stringify({ full: fullResponse })}\n\n`);
-    res.end();
-  } catch (error: any) {
-    res.write(`event: error\ndata: ${JSON.stringify({ error: error.message })}\n\n`);
-    res.end();
+    writeSSEDone(res, fullResponse);
+  } catch (error) {
+    writeSSEError(res, error);
   }
 };
+
+// --- Plain JSON handlers --------------------------------------------------------
+
+export const getChatHistory = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const { id: userId } = requireUser(req);
+  const memories = await getMemoryByType(userId, 'mentor', 50);
+  res.json({ success: true, data: memories });
+});
+
+export const generateRoadmap = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const { id: userId } = requireUser(req);
+  const { skillLevel, goals } = req.body as AIRequest;
+
+  const prompt = buildRoadmapPrompt(skillLevel || 'beginner', goals || '');
+  const response = await generateContent(prompt);
+  const modules = parseRoadmapResponse(response);
+
+  const learningPath = await LearningPath.create({
+    userId,
+    title: `IoT ${skillLevel || 'Beginner'} Roadmap`,
+    description: goals || 'Complete IoT learning journey',
+    level: skillLevel || 'beginner',
+    modules,
+    isActive: true,
+  });
+
+  await saveMemory(userId, 'roadmap', 'assistant', JSON.stringify(modules), { topic: 'roadmap' });
+  await Activity.create({
+    userId,
+    type: 'roadmap_started',
+    description: `Generated ${skillLevel || 'beginner'} learning roadmap`,
+  });
+
+  res.json({ success: true, data: learningPath });
+});
+
+export const recommendComponents = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const { id: userId } = requireUser(req);
+  const { project, budget } = req.body as AIRequest;
+
+  const response = await generateContent(buildComponentPrompt(project || '', budget || ''));
+  await saveMemory(userId, 'recommendation', 'assistant', response, { topic: 'component_recommendation' });
+
+  res.json({ success: true, data: response });
+});
+
+export const planProject = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const { id: userId } = requireUser(req);
+  const { idea, skillLevel } = req.body as AIRequest;
+
+  const response = await generateContent(buildProjectPlanPrompt(idea || '', skillLevel || 'beginner'));
+  await saveMemory(userId, 'mentor', 'assistant', response, { topic: 'project_plan' });
+
+  res.json({ success: true, data: response });
+});
+
+export const interviewQuestions = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const { id: userId } = requireUser(req);
+  const { experienceLevel, topic } = req.body as AIRequest;
+
+  const response = await generateContent(buildInterviewPrompt(experienceLevel || 'fresher', topic || 'General IoT'));
+  await saveMemory(userId, 'interview', 'assistant', response, { topic: 'interview_questions' });
+
+  res.json({ success: true, data: response });
+});
+
+export const submitInterviewAnswer = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const { id: userId } = requireUser(req);
+  const { question, answer, experienceLevel } = req.body as AIRequest;
+
+  const response = await generateContent(buildInterviewFeedbackPrompt(question || '', answer || '', experienceLevel || 'fresher'));
+  await saveMemory(userId, 'interview', 'assistant', response, { topic: 'interview_feedback' });
+  await Activity.create({ userId, type: 'interview_practice', description: 'Practiced interview question' });
+
+  res.json({ success: true, data: response });
+});
+
+export const recommendNext = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const { id: userId } = requireUser(req);
+
+  const recentMemories = await getRecentMemory(userId, 20);
+  const user = await getUserById(userId);
+  const prompt = buildRecommendPrompt(buildContextString(recentMemories), user?.skillLevel || 'beginner');
+  const response = await generateContent(prompt);
+
+  res.json({ success: true, data: response });
+});

@@ -23,7 +23,7 @@ import {
   interviewQuestionsSchema,
   submitInterviewAnswerSchema,
   assistantChatSchema,
-} from "../validators";
+} from '../validators';
 
 const router = Router();
 

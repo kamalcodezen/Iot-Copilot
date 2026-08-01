@@ -4,109 +4,78 @@ import Project from '../models/Project';
 import Activity from '../models/Activity';
 import { AuthRequest } from '../types';
 import { asyncHandler } from '../middlewares/asyncHandler';
-
-const userCollection = () => mongoose.connection.db?.collection('user');
+import { mongoIdParams, paginationSchema } from '../validators';
+import {
+  getUserById,
+  findUsers,
+  countUsers,
+  updateUserRoleById,
+  deleteUserById,
+} from '../services/user';
 
 export const getUsers = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const col = userCollection();
-    if (!col) {
-      res.status(500).json({ success: false, message: 'Database not connected' });
-      return;
-    }
+  const { page, limit, search } = paginationSchema.parse(req.query);
 
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 20;
-    const search = req.query.search as string;
+  const { users, total } = await findUsers(search, page, limit);
 
-    const query: any = {};
-    if (search) query.name = { $regex: search, $options: 'i' };
-
-    const users = await col.find(query)
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .toArray();
-
-    const total = await col.countDocuments(query);
-
-    res.json({
-      success: true,
-      data: users,
-      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
-    });
+  res.json({
+    success: true,
+    data: users,
+    pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+  });
 });
 
 export const updateUserRole = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const col = userCollection();
-    if (!col) {
-      res.status(500).json({ success: false, message: 'Database not connected' });
-      return;
-    }
+  const { id } = mongoIdParams.parse(req.params);
+  const { role } = req.body;
 
-    const { role } = req.body;
-    const result = await col.findOneAndUpdate(
-      { id: req.params.id },
-      { $set: { role } },
-      { returnDocument: 'after' }
-    );
+  const updated = await updateUserRoleById(id, role);
+  if (!updated) {
+    res.status(404).json({ success: false, message: 'User not found' });
+    return;
+  }
 
-    if (!result) {
-      res.status(404).json({ success: false, message: 'User not found' });
-      return;
-    }
-
-    res.json({ success: true, data: result });
+  res.json({ success: true, data: updated });
 });
 
 export const deleteUser = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const col = userCollection();
-    if (!col) {
-      res.status(500).json({ success: false, message: 'Database not connected' });
-      return;
-    }
+  const { id } = mongoIdParams.parse(req.params);
+  const existing = await getUserById(id);
+  if (!existing) {
+    res.status(404).json({ success: false, message: 'User not found' });
+    return;
+  }
 
-    const existing = await col.findOne({ id: req.params.id });
-    if (!existing) {
-      res.status(404).json({ success: false, message: 'User not found' });
-      return;
-    }
+  await deleteUserById(id);
 
-    await col.deleteOne({ id: req.params.id });
-    await Project.deleteMany({ userId: req.params.id });
-    await Activity.deleteMany({ userId: req.params.id });
+  // Remove everything the deleted user owned, including better-auth's
+  // session and account records for that user.
+  await Project.deleteMany({ userId: id });
+  await Activity.deleteMany({ userId: id });
+  await mongoose.connection.db?.collection('session').deleteMany({ userId: id });
+  await mongoose.connection.db?.collection('account').deleteMany({ userId: id });
 
-    const sessionCol = mongoose.connection.db?.collection('session');
-    const accountCol = mongoose.connection.db?.collection('account');
-    if (sessionCol) await sessionCol.deleteMany({ userId: req.params.id });
-    if (accountCol) await accountCol.deleteMany({ userId: req.params.id });
-
-    res.json({ success: true, message: 'User deleted' });
+  res.json({ success: true, message: 'User deleted' });
 });
 
 export const getStats = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const col = userCollection();
-    const totalUsers = col ? await col.countDocuments() : 0;
-    const totalProjects = await Project.countDocuments();
-    const totalPublicProjects = await Project.countDocuments({ isPublic: true });
-    const totalCompletedProjects = await Project.countDocuments({ status: 'completed' });
+  const totalUsers = await countUsers();
+  const totalProjects = await Project.countDocuments();
+  const totalPublicProjects = await Project.countDocuments({ isPublic: true });
+  const totalCompletedProjects = await Project.countDocuments({ status: 'completed' });
 
-    const recentUsers = col
-      ? await col.find()
-        .sort({ createdAt: -1 })
-        .limit(5)
-        .toArray()
-      : [];
+  const { users: recentUsers } = await findUsers(undefined, 1, 5);
 
-    const projectsByCategory = await Project.aggregate([
-      { $group: { _id: '$category', count: { $sum: 1 } } },
-    ]);
+  const projectsByCategory = await Project.aggregate([
+    { $group: { _id: '$category', count: { $sum: 1 } } },
+  ]);
 
-    res.json({
-      success: true,
-      data: {
-        totals: { totalUsers, totalProjects, totalPublicProjects, totalCompletedProjects },
-        recentUsers,
-        projectsByCategory,
-      },
-    });
+  res.json({
+    success: true,
+    data: {
+      totals: { totalUsers, totalProjects, totalPublicProjects, totalCompletedProjects },
+      recentUsers,
+      projectsByCategory,
+    },
+  });
 });

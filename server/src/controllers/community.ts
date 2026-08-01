@@ -1,103 +1,101 @@
 import { Response } from 'express';
-import mongoose from 'mongoose';
-import Project from '../models/Project';
+import type { FilterQuery } from 'mongoose';
+import Project, { IProject } from '../models/Project';
 import Comment from '../models/Comment';
 import { AuthRequest } from '../types';
 import { asyncHandler } from '../middlewares/asyncHandler';
+import { requireUser } from '../utils/request';
+import { getPublicUserById, getPublicUsersByIds } from '../services/user';
+import { mongoIdParams, communityQuerySchema } from '../validators';
 
-function userCollection() {
-  return mongoose.connection.db?.collection('user');
+interface PublicUserInfo {
+  name: string;
+  avatar: string;
 }
 
-async function attachUsers(projects: any[]) {
-  const col = userCollection();
-  if (!col) return projects;
-  const userIds = [...new Set(projects.map((p: any) => p.userId))];
-  const users = await col.find({ id: { $in: userIds } }).project({ id: 1, name: 1, avatar: 1, _id: 0 }).toArray();
-  const userMap = new Map(users.map((u: any) => [u.id, u]));
-  return projects.map((p: any) => ({
-    ...p.toObject(),
-    userId: userMap.get(p.userId) || { name: 'Anonymous', avatar: '' },
+// Replaces the project's userId with the author's public profile so the
+// community pages can render names and avatars without exposing emails.
+async function attachUsers(projects: IProject[]) {
+  const users = await getPublicUsersByIds(projects.map((p) => p.userId));
+  const userMap = new Map(users.map((u) => [u.id, u]));
+
+  return projects.map((project) => ({
+    ...project.toObject(),
+    userId: userMap.get(project.userId) || { name: 'Anonymous', avatar: '' },
   }));
 }
 
-async function attachUserToComment(comment: any) {
-  const col = userCollection();
-  if (!col) return comment;
-  const user = await col.findOne({ id: comment.userId }, { projection: { name: 1, avatar: 1, bio: 1 } });
+async function attachUserToComment(comment: InstanceType<typeof Comment>) {
+  const user = await getPublicUserById(comment.userId);
   return {
     ...comment.toObject(),
-    userId: user || { name: 'Anonymous', avatar: '' },
+    userId: (user || { name: 'Anonymous', avatar: '' }) as PublicUserInfo,
   };
 }
 
 export const getPublicProjects = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 12;
-    const search = req.query.search as string;
-    const category = req.query.category as string;
-    const difficulty = req.query.difficulty as string;
-    const sort = req.query.sort as string || '-likes';
+  const { page, limit, search, category, difficulty, sort } = communityQuerySchema.parse(req.query);
 
-    const query: any = { isPublic: true };
+  const query: FilterQuery<IProject> = { isPublic: true };
+  if (search) query.$text = { $search: search };
+  if (category) query.category = category;
+  if (difficulty) query.difficulty = difficulty;
 
-    if (search) query.$text = { $search: search };
-    if (category) query.category = category;
-    if (difficulty) query.difficulty = difficulty;
+  const projects = await Project.find(query)
+    .sort(sort || '-likes')
+    .skip((page - 1) * limit)
+    .limit(limit);
 
-    const projects = await Project.find(query)
-      .sort(sort)
-      .skip((page - 1) * limit)
-      .limit(limit);
+  const total = await Project.countDocuments(query);
+  const enriched = await attachUsers(projects);
 
-    const total = await Project.countDocuments(query);
-    const enriched = await attachUsers(projects);
-
-    res.json({
-      success: true,
-      data: enriched,
-      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
-    });
+  res.json({
+    success: true,
+    data: enriched,
+    pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+  });
 });
 
 export const getPublicProject = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const col = userCollection();
-    const project = await Project.findById(req.params.id);
+  const { id } = mongoIdParams.parse(req.params);
+  const project = await Project.findById(id);
+  if (!project || !project.isPublic) {
+    res.status(404).json({ success: false, message: 'Project not found' });
+    return;
+  }
 
-    if (!project || !project.isPublic) {
-      res.status(404).json({ success: false, message: 'Project not found' });
-      return;
-    }
+  const user = await getPublicUserById(project.userId);
+  const data = {
+    ...project.toObject(),
+    userId: (user || { name: 'Anonymous', avatar: '' }) as PublicUserInfo,
+  };
 
-    const user = col ? await col.findOne({ id: project.userId }, { projection: { name: 1, avatar: 1, bio: 1 } }) : null;
-    const data = { ...project.toObject(), userId: user || { name: 'Anonymous', avatar: '' } };
-
-    res.json({ success: true, data });
+  res.json({ success: true, data });
 });
 
 export const addComment = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const project = await Project.findById(req.params.id);
-    if (!project) {
-      res.status(404).json({ success: false, message: 'Project not found' });
-      return;
-    }
+  const { id: userId } = requireUser(req);
+  const { id } = mongoIdParams.parse(req.params);
+  const project = await Project.findById(id);
+  if (!project) {
+    res.status(404).json({ success: false, message: 'Project not found' });
+    return;
+  }
 
-    const comment = await Comment.create({
-      userId: req.user!.id,
-      projectId: req.params.id,
-      content: req.body.content,
-    });
+  const comment = await Comment.create({
+    userId,
+    projectId: id,
+    content: req.body.content,
+  });
 
-    const enriched = await attachUserToComment(comment);
-
-    res.status(201).json({ success: true, data: enriched });
+  const enriched = await attachUserToComment(comment);
+  res.status(201).json({ success: true, data: enriched });
 });
 
 export const getComments = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const comments = await Comment.find({ projectId: req.params.id })
-      .sort({ createdAt: -1 });
+  const { id } = mongoIdParams.parse(req.params);
+  const comments = await Comment.find({ projectId: id }).sort({ createdAt: -1 });
 
-    const enriched = await Promise.all(comments.map(attachUserToComment));
-
-    res.json({ success: true, data: enriched });
+  const enriched = await Promise.all(comments.map(attachUserToComment));
+  res.json({ success: true, data: enriched });
 });

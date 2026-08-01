@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { getLearningPaths, getLearningPath, updateLearningPath, deleteLearningPath } from '../controllers/learningPath';
 import { authenticate } from '../middlewares/auth';
 import { validate } from '../middlewares/validate';
-import { mongoIdParams, learningPathUpdateSchema } from "../validators";
+import { mongoIdParams, learningPathUpdateSchema } from '../validators';
 
 const router = Router();
 
