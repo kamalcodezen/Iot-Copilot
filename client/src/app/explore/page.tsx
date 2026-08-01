@@ -22,6 +22,7 @@ export default function ExplorePage() {
       try {
         const params: Record<string, string> = {};
         if (filters.search) params.search = filters.search;
+        if (filters.status) params.status = filters.status;
         if (filters.category) params.category = filters.category;
         if (filters.difficulty) params.difficulty = filters.difficulty;
         const { data } = await getCommunityProjects(params);

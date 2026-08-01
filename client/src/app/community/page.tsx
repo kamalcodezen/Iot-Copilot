@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Users, MessageSquare, Heart } from 'lucide-react';
+import { Users, Heart } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Avatar from '@/components/ui/Avatar';
 import IoTLoader from '@/components/ui/IoTLoader';
@@ -57,7 +57,6 @@ export default function CommunityPage() {
                   <p className="text-sm font-medium text-text-secondary mb-4 line-clamp-2">{project.description}</p>
                   <div className="flex items-center gap-4 text-sm text-text-muted mt-auto">
                     <span className="flex items-center gap-1 font-bold"><Heart size={14} className="text-error" />{project.likes}</span>
-                    <span className="flex items-center gap-1 font-bold"><MessageSquare size={14} className="text-accent" />0</span>
                     <span className="ml-auto text-xs font-bold capitalize px-2.5 py-0.5 rounded-full bg-bg-surface border border-border-default text-text-tertiary">{project.difficulty}</span>
                   </div>
                 </Card>
