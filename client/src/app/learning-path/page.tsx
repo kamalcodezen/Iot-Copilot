@@ -3,14 +3,15 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Route, Sparkles, CheckCircle2, Circle, Clock, Lock, ArrowLeft, Target, BookOpen, ChevronRight } from 'lucide-react';
+import { Route, Sparkles, ArrowLeft, Target, BookOpen } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
+import PageHeader from '@/components/layout/PageHeader';
+import LearningModuleRow from '@/features/learning/components/LearningModuleRow';
 import { getLearningPaths } from '@/lib/api/learning';
 import { updateLearningPathAction } from '@/lib/actions/learning';
 import { generateRoadmapAction } from '@/lib/actions/ai';
 import { LearningPath } from '@/types';
-import { formatTime } from '@/utils/format';
 import toast from 'react-hot-toast';
 
 export default function LearningPathPage() {
@@ -68,15 +69,7 @@ export default function LearningPathPage() {
   return (
     <div className="min-h-screen dashboard-bg space-y-6 sm:space-y-8 px-4 sm:px-6 lg:px-8 pb-24 sm:pb-20 lg:pb-10 pt-20">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-accent/20 to-blue-500/10 flex items-center justify-center">
-            <Route className="w-5 h-5 text-accent" />
-          </div>
-          <div>
-            <h1 className="text-xl sm:text-2xl font-extrabold text-text-primary">Learning Path</h1>
-            <p className="text-sm font-semibold text-text-tertiary">Your personalized IoT roadmap</p>
-          </div>
-        </div>
+        <PageHeader icon={Route} title="Learning Path" subtitle="Your personalized IoT roadmap" />
         <Link href="/dashboard" className="inline-flex items-center gap-1 text-xs font-bold text-accent hover:text-accent-hover transition-colors shrink-0">
           <ArrowLeft size={13} /> Dashboard
         </Link>
@@ -148,60 +141,13 @@ export default function LearningPathPage() {
 
           <div className="space-y-0">
             {activePath.modules.map((module, index) => (
-              <motion.div
+              <LearningModuleRow
                 key={module.order}
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className="flex gap-4 relative pb-5 last:pb-0"
-              >
-                <div className="flex flex-col items-center">
-                  <button
-                    onClick={() => {
-                      if (module.status === 'locked') return;
-                      const nextStatus = module.status === 'completed' ? 'available' : 'completed';
-                      updateModuleStatus(index, nextStatus);
-                    }}
-                    className={`relative z-10 transition-all ${module.status === 'locked' ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                  >
-                    {module.status === 'completed' ? (
-                      <CheckCircle2 className="w-5 h-5 text-success" />
-                    ) : module.status === 'in-progress' ? (
-                      <div className="w-5 h-5 rounded-full border-2 border-accent flex items-center justify-center">
-                        <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse-soft" />
-                      </div>
-                    ) : module.status === 'locked' ? (
-                      <Lock className="w-5 h-5 text-text-muted" />
-                    ) : (
-                      <Circle className="w-5 h-5 text-text-tertiary" />
-                    )}
-                  </button>
-                  {index < activePath.modules.length - 1 && <div className="w-px flex-1 bg-gradient-to-b from-accent/20 to-transparent mt-1" />}
-                </div>
-
-                <div className={`flex-1 bg-bg-card border rounded-xl p-4 shadow-elevation-low transition-all duration-200 hover:shadow-elevation-medium ${module.status === 'in-progress' ? 'border-accent/30' : 'border-border-default'} ${module.status === 'locked' ? 'opacity-50' : ''}`}>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h4 className="font-bold text-text-primary text-sm">Module {module.order}: {module.title}</h4>
-                      <p className="text-sm font-medium text-text-tertiary mt-1">{module.description}</p>
-                    </div>
-                    <div className="flex items-center gap-1 text-xs font-semibold text-text-muted shrink-0">
-                      <Clock size={11} />
-                      {formatTime(module.estimatedHours * 60)}
-                    </div>
-                  </div>
-
-                  {module.resources.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      {module.resources.map((r, i) => (
-                        <span key={i} className="text-xs font-semibold px-2.5 py-1 rounded-full bg-bg-elevated border border-border-default text-text-tertiary flex items-center gap-1">
-                          {r.type === 'video' ? '🎥' : r.type === 'article' ? '📄' : '📚'} {r.title}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </motion.div>
+                module={module}
+                index={index}
+                total={activePath.modules.length}
+                onToggle={updateModuleStatus}
+              />
             ))}
           </div>
         </Card>

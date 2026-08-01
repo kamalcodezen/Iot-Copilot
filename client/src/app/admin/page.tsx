@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Shield, Users, FolderKanban, BarChart3, AlertTriangle, RefreshCw, TrendingUp } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import IoTLoader from '@/components/ui/IoTLoader';
+import PageHeader from '@/components/layout/PageHeader';
 import { getAdminStats } from '@/lib/api/admin';
 import { formatDate } from '@/utils/date';
 import { AdminStats } from '@/types';
@@ -51,15 +52,7 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen dashboard-bg space-y-6 sm:space-y-8 px-4 sm:px-6 lg:px-8 pb-24 sm:pb-20 lg:pb-10 pt-20">
-      <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-accent/20 to-blue-500/10 flex items-center justify-center">
-          <Shield className="w-5 h-5 text-accent" />
-        </div>
-        <div>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-text-primary">Admin Dashboard</h1>
-          <p className="text-sm font-semibold text-text-tertiary">Platform overview and management</p>
-        </div>
-      </div>
+      <PageHeader icon={Shield} title="Admin Dashboard" subtitle="Platform overview and management" />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {statCards.map((item, index) => (

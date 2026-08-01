@@ -7,6 +7,7 @@ import { useAIStore } from '@/store/aiStore';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
+import PageHeader from '@/components/layout/PageHeader';
 import { getInterviewQuestionsAction, submitInterviewAnswerAction } from '@/lib/actions/ai';
 import toast from 'react-hot-toast';
 
@@ -60,15 +61,7 @@ export default function InterviewCoachPage() {
   return (
     <div className="min-h-screen dashboard-bg space-y-6 sm:space-y-8 px-4 sm:px-6 lg:px-8 pb-24 sm:pb-20 lg:pb-10 pt-20">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-accent/20 to-blue-500/10 flex items-center justify-center">
-            <Briefcase className="w-5 h-5 text-accent" />
-          </div>
-          <div>
-            <h1 className="text-xl sm:text-2xl font-extrabold text-text-primary">Interview Coach</h1>
-            <p className="text-sm font-semibold text-text-tertiary">Practice with real IoT interview questions</p>
-          </div>
-        </div>
+        <PageHeader icon={Briefcase} title="Interview Coach" subtitle="Practice with real IoT interview questions" />
         <Link href="/dashboard" className="inline-flex items-center gap-1 text-xs font-bold text-accent hover:text-accent-hover transition-colors shrink-0">
           <ArrowLeft size={13} /> Dashboard
         </Link>

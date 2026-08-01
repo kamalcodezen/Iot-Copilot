@@ -151,7 +151,7 @@ export default function Navbar() {
               <div className="relative flex items-center justify-center h-10 w-10 rounded-2xl bg-gradient-to-br from-teal-500/20 to-accent/20 border border-accent/30 shadow-[0_0_15px_rgba(20,184,166,0.2)] group-hover:shadow-[0_0_25px_rgba(20,184,166,0.4)] transition-all duration-300">
                 <CircuitBoard className="w-5 h-5 text-accent group-hover:scale-110 transition-transform duration-300" />
               </div>
-              <span className="text-xl font-extrabold tracking-tight font-sekuya">
+              <span className="text-xl font-extrabold tracking-tight">
                 <span className="text-text-primary">IoT</span><span className="text-accent drop-shadow-[0_0_10px_rgba(20,184,166,0.5)]">Copilot</span>
               </span>
             </Link>

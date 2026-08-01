@@ -72,7 +72,7 @@ export default function MobileSidebar({ open, isAuthenticated, user, isLoggingOu
                   <div className="flex items-center justify-center h-9 w-9 rounded-xl bg-gradient-to-br from-teal-500/20 to-accent/20 border border-accent/30 shadow-[0_0_15px_rgba(20,184,166,0.2)]">
                     <CircuitBoard className="h-5 w-5 text-accent" />
                   </div>
-                  <span className="text-xl font-extrabold font-sekuya"><span className="text-text-primary">IoT</span><span className="text-accent drop-shadow-[0_0_10px_rgba(20,184,166,0.5)]">Copilot</span></span>
+                  <span className="text-xl font-extrabold"><span className="text-text-primary">IoT</span><span className="text-accent drop-shadow-[0_0_10px_rgba(20,184,166,0.5)]">Copilot</span></span>
                 </Link>
                 <button onClick={onClose} className="flex items-center justify-center h-10 w-10 rounded-full text-text-tertiary hover:text-white hover:bg-white/10 transition-colors" aria-label="Close menu">
                   <X size={18} />

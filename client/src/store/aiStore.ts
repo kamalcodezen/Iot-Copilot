@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { AIMemory } from '@/types';
 
 export type ChatType = 'mentor' | 'debug' | 'interview';
 
@@ -15,13 +14,11 @@ interface AIState {
   isStreaming: boolean;
   debugMessages: ChatMessage[];
   interviewMessages: ChatMessage[];
-  memory: AIMemory[];
   addMessage: (messages: ChatMessage[], type?: ChatType) => void;
   addStreamToken: (token: string, type?: ChatType) => void;
   setStreaming: (streaming: boolean) => void;
   setMessages: (messages: ChatMessage[], type: ChatType) => void;
   clearMessages: (type: ChatType) => void;
-  setMemory: (memory: AIMemory[]) => void;
 }
 
 const generateId = () => Math.random().toString(36).substring(7);
@@ -46,7 +43,6 @@ export const useAIStore = create<AIState>((set) => ({
   isStreaming: false,
   debugMessages: [],
   interviewMessages: [],
-  memory: [],
 
   addMessage: (newMessages, type = 'mentor') =>
     set((state) => updateMessageList(state, type, [...getMessageList(state, type), ...newMessages])),
@@ -73,6 +69,4 @@ export const useAIStore = create<AIState>((set) => ({
 
   clearMessages: (type) =>
     set((state) => updateMessageList(state, type, [])),
-
-  setMemory: (memory) => set({ memory }),
 }));

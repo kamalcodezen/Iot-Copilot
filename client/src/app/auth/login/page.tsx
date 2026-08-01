@@ -3,15 +3,15 @@
 import { useState, Suspense, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CircuitBoard, Eye, EyeOff, ChromeIcon, Signal, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, ChromeIcon, ArrowRight } from 'lucide-react';
 import { loginSchema } from '@/utils/validation';
 import { useAuthStore } from '@/store/authStore';
 import { getAuthError, getErrorMessage } from '@/utils/errors';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import AuthShell from '@/components/auth/AuthShell';
 import toast from 'react-hot-toast';
 import Spinner from '@/components/ui/Spinner';
 
@@ -93,35 +93,20 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center dashboard-bg relative pt-20">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(95,161,179,0.06)_0%,transparent_60%)]" />
-
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative z-10 w-full max-w-md px-4"
-      >
-        <div className="bg-bg-elevated border border-border-default rounded-2xl p-7 sm:p-8 shadow-elevation-high">
-          <div className="text-center mb-7">
-            <Link href="/" className="inline-flex items-center gap-2.5 mb-5 group justify-center">
-              <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-accent-light border border-accent/20 group-hover:scale-105 transition-transform">
-                <CircuitBoard className="w-6 h-6 text-accent" />
-              </div>
-              <span className="text-xl font-extrabold">
-                <span className="text-text-primary">IoT</span><span className="text-accent">Copilot</span>
-              </span>
-            </Link>
-            <h1 className="text-xl font-extrabold text-text-primary mb-1.5">Welcome back</h1>
-            <p className="text-sm font-semibold text-text-tertiary">Sign in to continue your IoT journey</p>
-          </div>
-
-          {apiError && (
-            <div className="mb-4 p-3 rounded-xl bg-error-light border border-error/30 text-sm font-semibold text-error">
-              {apiError}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <AuthShell
+      title="Welcome back"
+      subtitle="Sign in to continue your IoT journey"
+      apiError={apiError}
+      footer={
+        <>
+          Don&apos;t have an account?{' '}
+          <Link href="/auth/register" className="text-accent hover:text-accent-hover transition-colors">
+            Create one
+          </Link>
+        </>
+      }
+    >
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <Input
               label="Email"
               type="email"
@@ -188,16 +173,7 @@ function LoginForm() {
               Google
             </Button>
           </form>
-
-          <p className="text-center text-sm font-semibold text-text-secondary mt-6">
-            Don&apos;t have an account?{' '}
-            <Link href="/auth/register" className="text-accent hover:text-accent-hover transition-colors">
-              Create one
-            </Link>
-          </p>
-        </div>
-      </motion.div>
-    </div>
+    </AuthShell>
   );
 }
 
