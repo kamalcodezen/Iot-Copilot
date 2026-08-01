@@ -20,9 +20,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     if (!fetchedRef.current) {
       fetchedRef.current = true;
-      fetchMe();
+      // Only fetch if we are not already authenticated
+      if (!isAuthenticated) {
+        fetchMe();
+      }
     }
-  }, [fetchMe]);
+  }, [fetchMe, isAuthenticated]);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated && !isLoggingOut) {

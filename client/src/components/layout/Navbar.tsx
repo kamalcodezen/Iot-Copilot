@@ -61,9 +61,12 @@ export default function Navbar() {
   useEffect(() => {
     if (!fetchedRef.current) {
       fetchedRef.current = true;
-      fetchMe();
+      // Only fetch if we are not already authenticated
+      if (!isAuthenticated) {
+        fetchMe();
+      }
     }
-  }, [fetchMe]);
+  }, [fetchMe, isAuthenticated]);
 
   const isLanding = pathname === '/';
 
