@@ -27,22 +27,3 @@ export const sendPasswordResetEmail = async (email: string, token: string) => {
     `,
   });
 };
-
-export const sendWelcomeEmail = async (email: string, name: string) => {
-  await transporter.sendMail({
-    from: `"IoT Copilot AI" <${env.SMTP_USER}>`,
-    to: email,
-    subject: 'Welcome to IoT Copilot AI!',
-    html: `
-      <h2>Welcome, ${name}! 🚀</h2>
-      <p>Your journey to becoming an IoT expert starts now.</p>
-      <p>Get started by:</p>
-      <ul>
-        <li>Completing your skill assessment</li>
-        <li>Exploring AI Mentor for guidance</li>
-        <li>Building your first project</li>
-      </ul>
-      <a href="${env.FRONTEND_URL}/dashboard" style="display:inline-block;padding:12px 24px;background:#00d4ff;color:#000;text-decoration:none;border-radius:8px;">Go to Dashboard</a>
-    `,
-  });
-};

@@ -6,6 +6,7 @@ const PLACEHOLDER_KEY = 'YOUR_API_KEY';
 
 function handleGeminiError(error: unknown): never {
   const raw = error instanceof Error ? error.message : String(error);
+  console.error(`[AI Service] Gemini API error: ${raw.slice(0, 300)}`);
   if (/429|RESOURCE_EXHAUSTED|quota|rate\s*limit/i.test(raw)) {
     throw new RateLimitError('AI quota exceeded. Please try again later.');
   }
@@ -248,19 +249,21 @@ const GEMINI_CONFIG = { maxOutputTokens: 4096 };
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const withRetry = async <T>(operation: () => Promise<T>, maxRetries = 3): Promise<T> => {
-  let lastError;
+  let lastError: unknown;
   for (let i = 0; i < maxRetries; i++) {
     try {
       return await operation();
-    } catch (error: any) {
+    } catch (error) {
       lastError = error;
       const raw = error instanceof Error ? error.message : String(error);
       const isRetryable = /429|503|RESOURCE_EXHAUSTED|UNAVAILABLE|quota|rate\s*limit/i.test(raw);
       if (!isRetryable || i === maxRetries - 1) {
         throw error;
       }
-      
-      // Check if API specifies a long retry delay (e.g. "Please retry in 46.4s")
+
+      // The API sometimes asks for a long wait (e.g. "Please retry in 46.4s")
+      // when the free-tier quota is exhausted. Retrying after such a wait
+      // would hang the request, so the error is surfaced immediately instead.
       const retryMatch = raw.match(/retry in ([\d\.]+)s/i);
       if (retryMatch && parseFloat(retryMatch[1]) > 10) {
         console.warn(`[AI Service] API requested a ${retryMatch[1]}s wait. Aborting retry to avoid hanging.`);
@@ -283,9 +286,8 @@ export const generateContent = async (prompt: string): Promise<string> => {
       config: GEMINI_CONFIG,
     }));
     return response.text || '';
-  } catch (error: any) {
-    if (error?.message?.startsWith('AI ')) throw error;
-    console.error('Gemini API error:', error);
+  } catch (error) {
+    // handleGeminiError always throws a typed AppError, so this line is unreachable.
     handleGeminiError(error);
   }
 };
@@ -300,9 +302,8 @@ export const generateContentStream = async function* (prompt: string) {
     for await (const chunk of stream) {
       if (chunk.text) yield chunk.text;
     }
-  } catch (error: any) {
-    if (error?.message?.startsWith('AI ')) throw error;
-    console.error('Gemini streaming error:', error);
+  } catch (error) {
+    // handleGeminiError always throws a typed AppError, so this line is unreachable.
     handleGeminiError(error);
   }
 };
