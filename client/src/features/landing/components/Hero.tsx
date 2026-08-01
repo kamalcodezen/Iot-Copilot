@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowRight, Sparkles, Cpu, Wifi, Radio, Activity, Signal, Globe, Shield, CircuitBoard, Zap, Bot, Cloud, Gauge, Monitor, HardDrive } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { useAuthStore } from '@/store/authStore';
 
@@ -29,7 +30,7 @@ const stats = [
   { value: '<50ms', label: 'Edge Latency', icon: Gauge, color: 'bg-teal-500' },
 ];
 
-function StatCard({ icon: Icon, label, value, color, index }: { icon: any; label: string; value: string; color: string; index: number }) {
+function StatCard({ icon: Icon, label, value, color, index }: { icon: LucideIcon; label: string; value: string; color: string; index: number }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

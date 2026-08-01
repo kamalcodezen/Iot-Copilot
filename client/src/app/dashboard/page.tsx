@@ -8,13 +8,14 @@ import StatsBar from '@/features/dashboard/components/StatsBar';
 import ProgressChart from '@/features/dashboard/components/ProgressChart';
 import SkillRadar from '@/features/dashboard/components/SkillRadar';
 import RecentActivity from '@/features/dashboard/components/RecentActivity';
-import AISuggestions from '@/features/dashboard/components/AISuggestions';
+import AISuggestions, { AISuggestion } from '@/features/dashboard/components/AISuggestions';
 import ProjectProgress from '@/features/dashboard/components/ProjectProgress';
 import QuickActions from '@/features/dashboard/components/QuickActions';
 import { useAuthStore } from '@/store/authStore';
 import { getActivities, getDashboardStats as getActivityStats } from '@/lib/api/dashboard';
 import { getProjects } from '@/lib/api/project';
 import { clientFetch } from '@/lib/api/client-api';
+import { getErrorMessage } from '@/utils/errors';
 import Button from '@/components/ui/Button';
 import { StatsData, Activity, Project, ApiResponse } from '@/types';
 
@@ -77,7 +78,7 @@ export default function DashboardPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
+  const [aiSuggestions, setAiSuggestions] = useState<AISuggestion[]>([]);
   const [suggestionsLoading, setSuggestionsLoading] = useState(true);
   const [aiError, setAiError] = useState('');
 
@@ -108,10 +109,8 @@ export default function DashboardPage() {
       const data = res.data;
       let parsed = typeof data === 'string' ? JSON.parse(data) : data;
       if (Array.isArray(parsed)) setAiSuggestions(parsed);
-    } catch (err: any) {
-      let message = 'Could not load AI suggestions.';
-      try { const parsed = JSON.parse(err.message); message = parsed.message || message; } catch {}
-      setAiError(message);
+    } catch (error) {
+      setAiError(getErrorMessage(error, 'Could not load AI suggestions.'));
     } finally {
       setSuggestionsLoading(false);
     }

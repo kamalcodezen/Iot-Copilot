@@ -4,16 +4,18 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Edit3 } from 'lucide-react';
-import ProjectForm from '@/features/projects/components/ProjectForm';
+import ProjectForm, { ProjectFormData } from '@/features/projects/components/ProjectForm';
 import IoTLoader from '@/components/ui/IoTLoader';
 import { getProjectById as getProject } from '@/lib/api/project';
 import { updateProjectAction } from '@/lib/actions/project';
+import { getErrorMessage } from '@/utils/errors';
+import { Project } from '@/types';
 import toast from 'react-hot-toast';
 
 export default function EditProjectPage() {
   const params = useParams();
   const router = useRouter();
-  const [project, setProject] = useState<any>(null);
+  const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,13 +33,13 @@ export default function EditProjectPage() {
     fetchProject();
   }, [params.id, router]);
 
-  const handleSubmit = async (formData: any) => {
+  const handleSubmit = async (formData: ProjectFormData) => {
     try {
       await updateProjectAction(params.id as string, formData);
       toast.success('Project updated!');
       router.push(`/projects/${params.id}`);
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update');
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Failed to update'));
     }
   };
 

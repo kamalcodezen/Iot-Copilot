@@ -9,6 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { CircuitBoard, Eye, EyeOff, ChromeIcon, ArrowRight } from 'lucide-react';
 import { registerSchema } from '@/utils/validation';
 import { useAuthStore } from '@/store/authStore';
+import { getAuthError, getErrorMessage } from '@/utils/errors';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import toast from 'react-hot-toast';
@@ -28,15 +29,13 @@ function getPasswordStrength(password: string): { level: number; label: string; 
   return { level: 3, label: 'Strong', color: 'bg-success', width: 'w-full' };
 }
 
-function getErrorMessage(err: any): string {
-  if (!err) return 'Registration failed';
-  const code = err?.code || err?.status || '';
-  const msg = err?.message || err?.error || '';
-  if (code === 'USER_ALREADY_EXISTS' || msg.includes('already exists')) return 'An account with this email already exists';
-  if (code === 'WEAK_PASSWORD' || msg.includes('weak')) return 'Password is too weak. Use at least 6 characters';
+function getRegisterErrorMessage(error: unknown): string {
+  const { code, message } = getAuthError(error);
+  if (code === 'USER_ALREADY_EXISTS' || message.includes('already exists')) return 'An account with this email already exists';
+  if (code === 'WEAK_PASSWORD' || message.includes('weak')) return 'Password is too weak. Use at least 6 characters';
   if (code === 'INVALID_EMAIL') return 'Please enter a valid email address';
-  if (code === 'RATE_LIMIT' || msg.includes('rate')) return 'Too many attempts. Please try again later';
-  return msg || 'Registration failed';
+  if (code === 'RATE_LIMIT' || message.includes('rate')) return 'Too many attempts. Please try again later';
+  return message || 'Registration failed';
 }
 
 export default function RegisterPage() {
@@ -92,8 +91,8 @@ export default function RegisterPage() {
       const user = await registerUser(data.name, data.email, data.password);
       toast.success('Account created! Welcome to IoT Copilot.');
       router.push(user.role === 'admin' ? '/admin' : '/dashboard');
-    } catch (error: any) {
-      const message = getErrorMessage(error);
+    } catch (error) {
+      const message = getRegisterErrorMessage(error);
       setApiError(message);
       toast.error(message);
     }
@@ -104,8 +103,8 @@ export default function RegisterPage() {
       setSocialLoading(true);
       setApiError('');
       await signInWithGoogle();
-    } catch (error: any) {
-      const message = error?.message || 'Google sign-in failed';
+    } catch (error) {
+      const message = getErrorMessage(error, 'Google sign-in failed');
       setApiError(message);
       toast.error(message);
       setSocialLoading(false);

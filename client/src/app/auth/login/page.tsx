@@ -9,6 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { CircuitBoard, Eye, EyeOff, ChromeIcon, Signal, ArrowRight } from 'lucide-react';
 import { loginSchema } from '@/utils/validation';
 import { useAuthStore } from '@/store/authStore';
+import { getAuthError, getErrorMessage } from '@/utils/errors';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import toast from 'react-hot-toast';
@@ -16,16 +17,14 @@ import Spinner from '@/components/ui/Spinner';
 
 type LoginForm = { email: string; password: string };
 
-function getErrorMessage(err: any): string {
-  if (!err) return 'Login failed';
-  const code = err?.code || err?.status || '';
-  const msg = err?.message || err?.error || '';
-  if (code === 'INVALID_EMAIL_OR_PASSWORD' || msg.includes('Invalid email')) return 'Invalid email or password';
+function getLoginErrorMessage(error: unknown): string {
+  const { code, message } = getAuthError(error);
+  if (code === 'INVALID_EMAIL_OR_PASSWORD' || message.includes('Invalid email')) return 'Invalid email or password';
   if (code === 'USER_NOT_FOUND') return 'No account found with this email';
   if (code === 'EMAIL_NOT_VERIFIED') return 'Please verify your email before signing in';
-  if (code === 'ACCOUNT_SUSPENDED' || msg.includes('suspended')) return 'This account has been suspended';
-  if (code === 'RATE_LIMIT' || msg.includes('rate')) return 'Too many attempts. Please try again later';
-  return msg || 'Login failed';
+  if (code === 'ACCOUNT_SUSPENDED' || message.includes('suspended')) return 'This account has been suspended';
+  if (code === 'RATE_LIMIT' || message.includes('rate')) return 'Too many attempts. Please try again later';
+  return message || 'Login failed';
 }
 
 function LoginForm() {
@@ -73,8 +72,8 @@ function LoginForm() {
       const user = await login(data.email, data.password);
       toast.success('Welcome back!');
       router.push(user.role === 'admin' ? '/admin' : (searchParams.get('redirect') || '/dashboard'));
-    } catch (error: any) {
-      const message = getErrorMessage(error);
+    } catch (error) {
+      const message = getLoginErrorMessage(error);
       setApiError(message);
       toast.error(message);
     }
@@ -85,8 +84,8 @@ function LoginForm() {
       setSocialLoading(true);
       setApiError('');
       await signInWithGoogle();
-    } catch (error: any) {
-      const message = error?.message || 'Google sign-in failed';
+    } catch (error) {
+      const message = getErrorMessage(error, 'Google sign-in failed');
       setApiError(message);
       toast.error(message);
       setSocialLoading(false);

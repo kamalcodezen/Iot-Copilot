@@ -9,6 +9,7 @@ import Input from '@/components/ui/Input';
 import IoTLoader from '@/components/ui/IoTLoader';
 import { useAuthStore } from '@/store/authStore';
 import { authClient } from '@/lib/auth-client';
+import { getErrorMessage } from '@/utils/errors';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 
@@ -44,8 +45,8 @@ export default function SettingsPage() {
       
       await fetchMe();
       toast.success('Profile updated successfully');
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to update profile');
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Failed to update profile'));
     } finally {
       setSavingProfile(false);
     }
@@ -75,8 +76,8 @@ export default function SettingsPage() {
       toast.success('Password changed successfully');
       setCurrentPassword('');
       setNewPassword('');
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to change password');
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Failed to change password'));
     } finally {
       setSavingPassword(false);
     }

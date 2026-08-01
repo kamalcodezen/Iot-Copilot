@@ -7,6 +7,7 @@ import { CircuitBoard, ArrowLeft, Mail, CheckCircle2, ArrowRight } from 'lucide-
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { authClient } from '@/lib/auth-client';
+import { getErrorMessage } from '@/utils/errors';
 import toast from 'react-hot-toast';
 
 export default function ForgotPasswordPage() {
@@ -21,8 +22,8 @@ export default function ForgotPasswordPage() {
       await authClient.requestPasswordReset({ email });
       setSent(true);
       toast.success('Reset link sent!');
-    } catch (error: any) {
-      toast.error(error?.message || error?.error || 'Failed to send reset email');
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Failed to send reset email'));
     } finally {
       setIsLoading(false);
     }

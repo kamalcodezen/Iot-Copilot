@@ -111,10 +111,9 @@ export default function ProfilePage() {
             <h3 className="text-sm font-bold text-text-primary uppercase tracking-wide">Badges</h3>
           </div>
           <div className="flex flex-wrap gap-3">
-            {user.badges.map((badge: any, i: number) => (
+            {user.badges.map((badge: string, i: number) => (
               <div key={i} className="bg-gradient-to-br from-amber-500/10 to-orange-500/5 border border-amber-500/20 rounded-xl px-4 py-3 text-center transition-all duration-200 hover:shadow-elevation-medium hover:-translate-y-0.5">
-                <p className="text-sm font-bold text-amber-400">{badge.name}</p>
-                <p className="text-xs font-semibold text-text-muted mt-0.5">{formatDate(badge.earnedAt)}</p>
+                <p className="text-sm font-bold text-amber-400">{badge}</p>
               </div>
             ))}
           </div>

@@ -7,6 +7,8 @@ import { Bot, Send, Sparkles, X } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { streamAssistant } from '@/lib/api/ai-stream';
 import { getPageContext } from '@/lib/ai/pageContext';
+import { getErrorMessage } from '@/utils/errors';
+import MarkdownText from '@/features/ai/components/MarkdownText';
 
 interface Message {
   id: string;
@@ -23,73 +25,6 @@ const SUGGESTIONS = [
   'How do I start learning IoT?',
   'What is MQTT?',
 ];
-
-function renderInline(text: string) {
-  const segments = text.split(/(`[^`]+`)/g);
-  return segments.map((segment, i) => {
-    if (segment.startsWith('`') && segment.endsWith('`')) {
-      return (
-        <code key={i} className="px-1 py-0.5 rounded bg-glass text-accent text-xs code-font">
-          {segment.slice(1, -1)}
-        </code>
-      );
-    }
-    const boldParts = segment.split(/(\*\*[^*]+\*\*)/g);
-    return boldParts.map((boldPart, j) => {
-      if (boldPart.startsWith('**') && boldPart.endsWith('**')) {
-        return (
-          <strong key={j} className="font-semibold text-text-primary">
-            {boldPart.slice(2, -2)}
-          </strong>
-        );
-      }
-      return <span key={j}>{boldPart}</span>;
-    });
-  });
-}
-
-function renderContent(content: string) {
-  const parts = content.split(/(```[\s\S]*?```)/g);
-  return parts.map((part, i) => {
-    if (part.startsWith('```')) {
-      const match = part.match(/```(\w*)\n([\s\S]*?)```/);
-      if (match) {
-        return (
-          <pre key={i} className="my-2 rounded-lg bg-bg-elevated border border-border-default p-2.5 overflow-x-auto text-xs code-font text-text-secondary">
-            <code>{match[2].trim()}</code>
-          </pre>
-        );
-      }
-    }
-    return (
-      <div key={i} className="space-y-1.5">
-        {part.split('\n').map((line, j) => {
-          const trimmed = line.trim();
-          if (!trimmed) return <div key={j} className="h-1.5" />;
-          const bullet = trimmed.match(/^[-*]\s+(.*)/);
-          if (bullet) {
-            return (
-              <div key={j} className="flex gap-2 pl-1">
-                <span className="mt-[7px] h-1 w-1 rounded-full bg-accent flex-shrink-0" />
-                <span>{renderInline(bullet[1])}</span>
-              </div>
-            );
-          }
-          const numbered = trimmed.match(/^\d+[.)]\s+(.*)/);
-          if (numbered) {
-            return (
-              <div key={j} className="flex gap-2 pl-1">
-                <span className="mt-[1px] text-accent font-semibold flex-shrink-0">{numbered[0].match(/^\d+[.)]/)?.[0]}</span>
-                <span>{renderInline(numbered[1])}</span>
-              </div>
-            );
-          }
-          return <p key={j}>{renderInline(trimmed)}</p>;
-        })}
-      </div>
-    );
-  });
-}
 
 export default function AIAssistant() {
   const pathname = usePathname();
@@ -114,9 +49,10 @@ export default function AIAssistant() {
           prev.map((m) => (m.id === botMsgId ? { ...m, content: m.content + token, failed: false } : m))
         );
       });
-    } catch (err: any) {
+    } catch (error) {
+      const message = getErrorMessage(error, 'Connection issue');
       setMessages((prev) =>
-        prev.map((m) => (m.id === botMsgId ? { ...m, failed: true, error: err?.message || 'Connection issue' } : m))
+        prev.map((m) => (m.id === botMsgId ? { ...m, failed: true, error: message } : m))
       );
     } finally {
       setStreaming(false);
@@ -205,7 +141,7 @@ export default function AIAssistant() {
                           </button>
                         </div>
                       ) : (
-                        renderContent(m.content)
+                        <MarkdownText content={m.content} />
                       )}
                       {m.role === 'assistant' && !m.failed && streaming && m.id === messages[messages.length - 1]?.id && !m.content && (
                         <span className="inline-flex gap-1 pl-1">

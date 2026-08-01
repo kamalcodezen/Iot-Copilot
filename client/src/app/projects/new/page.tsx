@@ -3,21 +3,22 @@
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { FolderKanban, ArrowLeft } from 'lucide-react';
-import ProjectForm from '@/features/projects/components/ProjectForm';
+import ProjectForm, { ProjectFormData } from '@/features/projects/components/ProjectForm';
 import { createProjectAction } from '@/lib/actions/project';
+import { getErrorMessage } from '@/utils/errors';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 
 export default function NewProjectPage() {
   const router = useRouter();
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: ProjectFormData) => {
     try {
       const { data: project } = await createProjectAction(data);
       toast.success('Project created!');
       router.push(`/projects/${project._id}`);
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to create project');
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Failed to create project'));
     }
   };
 

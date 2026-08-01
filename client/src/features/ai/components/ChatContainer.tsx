@@ -6,10 +6,10 @@ import { Bot } from 'lucide-react';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 import SuggestedQuestions from './SuggestedQuestions';
-import { useAIStore } from '@/store/aiStore';
+import { useAIStore, ChatType } from '@/store/aiStore';
 
 interface ChatContainerProps {
-  type: 'mentor' | 'debug' | 'interview';
+  type: ChatType;
   onSend: (message: string) => void;
   suggestedQuestions?: string[];
   placeholder?: string;

@@ -9,6 +9,8 @@ import { projectSchema } from '@/utils/validation';
 
 type ProjectFormData = z.infer<typeof projectSchema>;
 
+export type { ProjectFormData };
+
 interface ProjectFormProps {
   initialData?: Partial<ProjectFormData>;
   onSubmit: (data: ProjectFormData) => void;

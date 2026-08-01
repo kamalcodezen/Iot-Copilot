@@ -16,15 +16,22 @@ interface ProgressChartProps {
   data: Array<{ date: string; count: number }>;
 }
 
-function CustomTooltip({ active, payload, label }: any) {
-  if (active && payload?.length) {
+interface TooltipPayloadItem {
+  value?: number | string;
+}
+
+// recharts passes its tooltip props straight through, so describe only the
+// fields the tooltip reads.
+function CustomTooltip({ active, payload, label }: { active?: boolean; payload?: TooltipPayloadItem[]; label?: string | number }) {
+  if (active && payload?.length && payload[0].value !== undefined) {
+    const value = payload[0].value;
     return (
       <div className="bg-bg-elevated border border-border-default rounded-2xl px-4 py-3 text-sm shadow-elevation-high animate-scale-fade-in">
         <p className="text-text-tertiary text-xs font-semibold tracking-wide">{label}</p>
         <p className="text-accent font-extrabold mt-1 text-base tabular-nums">
-          {payload[0].value}
+          {value}
           <span className="text-xs font-bold text-text-tertiary ml-1.5">
-            {payload[0].value === 1 ? 'activity' : 'activities'}
+            {value === 1 ? 'activity' : 'activities'}
           </span>
         </p>
       </div>

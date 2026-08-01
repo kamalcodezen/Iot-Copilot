@@ -15,7 +15,16 @@ export async function clientFetch<T>(endpoint: string, options?: RequestInit): P
       useAuthStore.getState().setUser(null);
     }
     const text = await response.text();
-    throw new Error(text || `Request failed: ${response.status}`);
+    let message = text || `Request failed: ${response.status}`;
+    try {
+      // The API returns { success, message } envelopes; unwrap the message
+      // so errors surface as readable text.
+      const parsed = JSON.parse(text) as { message?: unknown };
+      if (typeof parsed.message === 'string' && parsed.message) message = parsed.message;
+    } catch {
+      // The body was not JSON, keep the raw text as the message.
+    }
+    throw new Error(message);
   }
   return response.json();
 }
