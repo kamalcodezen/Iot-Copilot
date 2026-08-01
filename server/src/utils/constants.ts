@@ -1,4 +1,5 @@
 export const SKILL_LEVELS = ['beginner', 'intermediate', 'advanced'] as const;
+export type SkillLevel = (typeof SKILL_LEVELS)[number];
 
 export const PROJECT_CATEGORIES = [
   'smart-home',
@@ -8,8 +9,10 @@ export const PROJECT_CATEGORIES = [
   'robotics',
   'other',
 ] as const;
+export type ProjectCategory = (typeof PROJECT_CATEGORIES)[number];
 
 export const PROJECT_STATUSES = ['planning', 'in-progress', 'completed', 'paused'] as const;
+export type ProjectStatus = (typeof PROJECT_STATUSES)[number];
 
 export const ACTIVITY_TYPES = [
   'project_created',
@@ -22,12 +25,7 @@ export const ACTIVITY_TYPES = [
   'badge_earned',
   'login',
 ] as const;
-
-export const PAGINATION = {
-  DEFAULT_PAGE: 1,
-  DEFAULT_LIMIT: 10,
-  MAX_LIMIT: 50,
-};
+export type ActivityType = (typeof ACTIVITY_TYPES)[number];
 
 export const AI_RATE_LIMIT = {
   WINDOW_MS: 60 * 1000,

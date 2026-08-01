@@ -1,15 +1,17 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
+export type AIMemoryType = 'mentor' | 'debug' | 'interview' | 'roadmap' | 'recommendation';
+
 export interface IAIMemory extends Document {
   userId: string;
-  type: 'mentor' | 'debug' | 'interview' | 'roadmap' | 'recommendation';
+  type: AIMemoryType;
   role: 'user' | 'assistant';
   content: string;
   metadata: {
-    topic: string;
-    projectId: mongoose.Types.ObjectId;
-    codeSnippet: string;
-    componentRefs: string[];
+    topic?: string;
+    projectId?: mongoose.Types.ObjectId;
+    codeSnippet?: string;
+    componentRefs?: string[];
   };
   createdAt: Date;
 }

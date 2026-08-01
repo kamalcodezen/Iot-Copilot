@@ -1,22 +1,15 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { ACTIVITY_TYPES } from '../utils/constants';
+import type { ActivityType } from '../utils/constants';
 
 export interface IActivity extends Document {
   userId: string;
-  type:
-    | 'project_created'
-    | 'project_completed'
-    | 'mentor_session'
-    | 'debug_session'
-    | 'interview_practice'
-    | 'roadmap_started'
-    | 'roadmap_completed'
-    | 'badge_earned'
-    | 'login';
+  type: ActivityType;
   description: string;
   metadata: {
-    projectId: mongoose.Types.ObjectId;
-    badgeName: string;
-    sessionDuration: number;
+    projectId?: mongoose.Types.ObjectId;
+    badgeName?: string;
+    sessionDuration?: number;
   };
   createdAt: Date;
 }
@@ -26,17 +19,7 @@ const activitySchema = new Schema<IActivity>(
     userId: { type: String, required: true, index: true },
     type: {
       type: String,
-      enum: [
-        'project_created',
-        'project_completed',
-        'mentor_session',
-        'debug_session',
-        'interview_practice',
-        'roadmap_started',
-        'roadmap_completed',
-        'badge_earned',
-        'login',
-      ],
+      enum: [...ACTIVITY_TYPES],
       required: true,
     },
     description: { type: String, required: true },

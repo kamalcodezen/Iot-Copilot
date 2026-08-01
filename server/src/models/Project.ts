@@ -1,12 +1,14 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { PROJECT_CATEGORIES, PROJECT_STATUSES, SKILL_LEVELS } from '../utils/constants';
+import type { ProjectCategory, ProjectStatus, SkillLevel } from '../utils/constants';
 
 export interface IProject extends Document {
   userId: string;
   title: string;
   description: string;
-  category: 'smart-home' | 'agriculture' | 'healthcare' | 'automation' | 'robotics' | 'other';
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
-  status: 'planning' | 'in-progress' | 'completed' | 'paused';
+  category: ProjectCategory;
+  difficulty: SkillLevel;
+  status: ProjectStatus;
   components: Array<{ name: string; quantity: number; link: string }>;
   circuitDescription: string;
   code: string;
@@ -28,17 +30,17 @@ const projectSchema = new Schema<IProject>(
     description: { type: String, required: true },
     category: {
       type: String,
-      enum: ['smart-home', 'agriculture', 'healthcare', 'automation', 'robotics', 'other'],
+      enum: [...PROJECT_CATEGORIES],
       default: 'other',
     },
     difficulty: {
       type: String,
-      enum: ['beginner', 'intermediate', 'advanced'],
+      enum: [...SKILL_LEVELS],
       default: 'beginner',
     },
     status: {
       type: String,
-      enum: ['planning', 'in-progress', 'completed', 'paused'],
+      enum: [...PROJECT_STATUSES],
       default: 'planning',
     },
     components: [
