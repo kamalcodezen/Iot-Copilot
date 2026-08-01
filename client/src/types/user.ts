@@ -11,7 +11,7 @@ export interface User {
     linkedin: string;
     twitter: string;
   };
-  badges: Array<{ name: string; earnedAt: string }>;
+  badges: string[];
   stats: {
     totalProjects: number;
     completedProjects: number;

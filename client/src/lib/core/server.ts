@@ -30,7 +30,7 @@ export const authHeaders = async (): Promise<Record<string, string>> => {
   }
 };
 
-export const serverFetch = async <T = any>(endpoint: string, options: RequestInit & { params?: Record<string, string | number | boolean | undefined> } = {}): Promise<T> => {
+export const serverFetch = async <T>(endpoint: string, options: RequestInit & { params?: Record<string, string | number | boolean | undefined> } = {}): Promise<T> => {
   const { params, headers, ...rest } = options;
   const url = buildUrl(endpoint, params);
   const aHeaders = await authHeaders();
@@ -63,13 +63,15 @@ export const serverFetch = async <T = any>(endpoint: string, options: RequestIni
     } catch {
       parsedBody = { message: errorBody };
     }
+    // Error responses don't match T, so cast the failed envelope that
+    // server actions can inspect instead of throwing.
     return { success: false, error: `API Error: ${response.status}`, details: parsedBody } as T;
   }
 
   return response.json();
 };
 
-export const protectedFetch = async <T = any>(endpoint: string, options?: RequestInit & { params?: Record<string, string | number | boolean | undefined> }): Promise<T> => {
+export const protectedFetch = async <T>(endpoint: string, options?: RequestInit & { params?: Record<string, string | number | boolean | undefined> }): Promise<T> => {
   const session = await getUserSession();
   if (!session) {
     redirect('/auth/login');
@@ -77,7 +79,7 @@ export const protectedFetch = async <T = any>(endpoint: string, options?: Reques
   return await serverFetch<T>(endpoint, options);
 };
 
-export const serverMutation = async <T = any>(endpoint: string, data?: any, method: string = 'POST'): Promise<T> => {
+export const serverMutation = async <T>(endpoint: string, data?: unknown, method: string = 'POST'): Promise<T> => {
   const options: RequestInit = {
     method,
   };

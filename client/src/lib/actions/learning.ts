@@ -5,14 +5,14 @@ import { LearningPath, ApiResponse } from '@/types';
 import { revalidatePath } from 'next/cache';
 
 export const updateLearningPathAction = async (id: string, data: Partial<LearningPath>) => {
-  const result = await serverMutation(`/learning-paths/${id}`, data, 'PUT') as ApiResponse<LearningPath>;
+  const result = await serverMutation<ApiResponse<LearningPath>>(`/learning-paths/${id}`, data, 'PUT');
   revalidatePath(`/learning-paths/${id}`);
   revalidatePath('/learning-paths');
   return result;
 };
 
 export const deleteLearningPathAction = async (id: string) => {
-  const result = await serverMutation(`/learning-paths/${id}`, undefined, 'DELETE');
+  const result = await serverMutation<ApiResponse<unknown>>(`/learning-paths/${id}`, undefined, 'DELETE');
   revalidatePath('/learning-paths');
   return result;
 };

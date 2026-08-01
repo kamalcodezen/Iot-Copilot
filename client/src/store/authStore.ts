@@ -2,6 +2,67 @@ import { create } from 'zustand';
 import { User } from '@/types';
 import { authClient } from '@/lib/auth-client';
 
+// The server stores extra profile data (role, skill level, badges, stats)
+// as extra fields on the better-auth user document, but better-auth's client
+// types don't know about them, so describe the fields we read here.
+interface SessionUser {
+  id: string;
+  name: string;
+  email: string;
+  image?: string | null;
+  emailVerified?: boolean;
+  createdAt?: string | Date;
+  role?: string;
+  skillLevel?: string;
+  bio?: string;
+  socialLinks?: string;
+  preferences?: string;
+  badges?: string[];
+  totalSessions?: number;
+  totalHours?: number;
+  totalProjects?: number;
+  completedProjects?: number;
+  learningStreak?: number;
+  lastActive?: string;
+}
+
+// JSON.parse returns any, so the generic cast gives the parsed profile
+// objects their real shapes.
+function parseProfile<T>(value: string | undefined, fallback: T): T {
+  if (value === undefined) return fallback;
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+function mapBetterAuthUser(sessionUser: SessionUser): User {
+  return {
+    id: sessionUser.id,
+    name: sessionUser.name || '',
+    email: sessionUser.email || '',
+    // The server validates both fields, so the string casts are safe.
+    role: (sessionUser.role || 'user') as User['role'],
+    skillLevel: (sessionUser.skillLevel || 'beginner') as User['skillLevel'],
+    avatar: sessionUser.image || '',
+    bio: sessionUser.bio || '',
+    socialLinks: parseProfile(sessionUser.socialLinks, { github: '', linkedin: '', twitter: '' }),
+    badges: sessionUser.badges || [],
+    stats: {
+      totalProjects: sessionUser.totalProjects ?? 0,
+      completedProjects: sessionUser.completedProjects ?? 0,
+      learningStreak: sessionUser.learningStreak ?? 0,
+      totalSessions: sessionUser.totalSessions ?? 0,
+      totalHours: sessionUser.totalHours ?? 0,
+      lastActive: sessionUser.lastActive || new Date().toISOString(),
+    },
+    preferences: parseProfile(sessionUser.preferences, { theme: 'dark', emailNotifications: true, language: 'en' }),
+    isVerified: sessionUser.emailVerified || false,
+    createdAt: sessionUser.createdAt ? new Date(sessionUser.createdAt).toISOString() : new Date().toISOString(),
+  };
+}
+
 interface AuthState {
   user: User | null;
   isLoading: boolean;
@@ -13,38 +74,6 @@ interface AuthState {
   signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   fetchMe: () => Promise<void>;
-}
-
-function mapBetterAuthUser(betterUser: any): User {
-  const socialLinks = typeof betterUser.socialLinks === 'string'
-    ? JSON.parse(betterUser.socialLinks)
-    : betterUser.socialLinks || { github: '', linkedin: '', twitter: '' };
-  const preferences = typeof betterUser.preferences === 'string'
-    ? JSON.parse(betterUser.preferences)
-    : betterUser.preferences || { theme: 'dark', emailNotifications: true, language: 'en' };
-
-  return {
-    id: betterUser.id,
-    name: betterUser.name || '',
-    email: betterUser.email || '',
-    role: betterUser.role || 'user',
-    avatar: betterUser.image || '',
-    skillLevel: betterUser.skillLevel || 'beginner',
-    bio: betterUser.bio || '',
-    socialLinks,
-    badges: betterUser.badges || [],
-    stats: betterUser.stats || {
-      totalProjects: 0,
-      completedProjects: 0,
-      learningStreak: 0,
-      totalSessions: 0,
-      totalHours: 0,
-      lastActive: new Date().toISOString(),
-    },
-    preferences,
-    isVerified: betterUser.emailVerified || false,
-    createdAt: betterUser.createdAt || new Date().toISOString(),
-  };
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -95,7 +124,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isLoading: true });
     try {
       const { data, error } = await authClient.getSession();
-      if (error || !data) {
+      if (error || !data?.user) {
         set({ user: null, isAuthenticated: false, isLoading: false });
         return;
       }

@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { AIMemory } from '@/types';
 
+export type ChatType = 'mentor' | 'debug' | 'interview';
+
 interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
@@ -14,15 +16,30 @@ interface AIState {
   debugMessages: ChatMessage[];
   interviewMessages: ChatMessage[];
   memory: AIMemory[];
-  addMessage: (messages: ChatMessage[], type?: 'mentor' | 'debug' | 'interview') => void;
-  addStreamToken: (token: string, type?: 'mentor' | 'debug' | 'interview') => void;
+  addMessage: (messages: ChatMessage[], type?: ChatType) => void;
+  addStreamToken: (token: string, type?: ChatType) => void;
   setStreaming: (streaming: boolean) => void;
-  setMessages: (messages: ChatMessage[], type: 'mentor' | 'debug' | 'interview') => void;
-  clearMessages: (type: 'mentor' | 'debug' | 'interview') => void;
+  setMessages: (messages: ChatMessage[], type: ChatType) => void;
+  clearMessages: (type: ChatType) => void;
   setMemory: (memory: AIMemory[]) => void;
 }
 
 const generateId = () => Math.random().toString(36).substring(7);
+
+// Each chat (mentor, debug, interview) keeps its own message list. These two
+// helpers hide which store field holds a chat's messages so the actions below
+// share one implementation.
+function getMessageList(state: AIState, type: ChatType): ChatMessage[] {
+  if (type === 'debug') return state.debugMessages;
+  if (type === 'interview') return state.interviewMessages;
+  return state.messages;
+}
+
+function updateMessageList(state: AIState, type: ChatType, messages: ChatMessage[]): Partial<AIState> {
+  if (type === 'debug') return { debugMessages: messages };
+  if (type === 'interview') return { interviewMessages: messages };
+  return { messages };
+}
 
 export const useAIStore = create<AIState>((set) => ({
   messages: [],
@@ -32,47 +49,30 @@ export const useAIStore = create<AIState>((set) => ({
   memory: [],
 
   addMessage: (newMessages, type = 'mentor') =>
-    set((state): Partial<AIState> => {
-      if (type === 'debug') return { debugMessages: [...state.debugMessages, ...newMessages] };
-      if (type === 'interview') return { interviewMessages: [...state.interviewMessages, ...newMessages] };
-      return { messages: [...state.messages, ...newMessages] };
-    }),
+    set((state) => updateMessageList(state, type, [...getMessageList(state, type), ...newMessages])),
 
   addStreamToken: (token, type = 'mentor') =>
-    set((state): Partial<AIState> => {
-      const targetMessages = type === 'debug' ? state.debugMessages : type === 'interview' ? state.interviewMessages : state.messages;
-      const lastMsg = targetMessages[targetMessages.length - 1];
-      if (lastMsg?.role === 'assistant') {
-        const updated = [...targetMessages];
-        updated[updated.length - 1] = { ...lastMsg, content: lastMsg.content + token };
-        if (type === 'debug') return { debugMessages: updated };
-        if (type === 'interview') return { interviewMessages: updated };
-        return { messages: updated };
+    set((state) => {
+      const messages = getMessageList(state, type);
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage?.role === 'assistant') {
+        const updated = [...messages];
+        updated[updated.length - 1] = { ...lastMessage, content: lastMessage.content + token };
+        return updateMessageList(state, type, updated);
       }
-      const newMessages: ChatMessage[] = [
-        ...targetMessages,
+      return updateMessageList(state, type, [
+        ...messages,
         { id: generateId(), role: 'assistant', content: token, timestamp: new Date() },
-      ];
-      if (type === 'debug') return { debugMessages: newMessages };
-      if (type === 'interview') return { interviewMessages: newMessages };
-      return { messages: newMessages };
+      ]);
     }),
 
   setStreaming: (streaming) => set({ isStreaming: streaming }),
 
   setMessages: (messages, type) =>
-    set((state) => {
-      if (type === 'debug') return { debugMessages: messages };
-      if (type === 'interview') return { interviewMessages: messages };
-      return { messages };
-    }),
+    set((state) => updateMessageList(state, type, messages)),
 
   clearMessages: (type) =>
-    set((state) => {
-      if (type === 'debug') return { debugMessages: [] };
-      if (type === 'interview') return { interviewMessages: [] };
-      return { messages: [] };
-    }),
+    set((state) => updateMessageList(state, type, [])),
 
   setMemory: (memory) => set({ memory }),
 }));

@@ -7,12 +7,7 @@ import Card from '@/components/ui/Card';
 import IoTLoader from '@/components/ui/IoTLoader';
 import { getAdminStats } from '@/lib/api/admin';
 import { formatDate } from '@/utils/date';
-
-interface AdminStats {
-  totals: { totalUsers: number; totalProjects: number; totalPublicProjects: number; totalCompletedProjects: number };
-  recentUsers: Array<{ _id: string; name: string; email: string; createdAt: string }>;
-  projectsByCategory: Array<{ _id: string; count: number }>;
-}
+import { AdminStats } from '@/types';
 
 export default function AdminPage() {
   const [stats, setStats] = useState<AdminStats | null>(null);
@@ -90,7 +85,7 @@ export default function AdminPage() {
           </div>
           <div className="space-y-2">
             {stats?.recentUsers?.map((user) => (
-              <div key={user._id} className="flex items-center justify-between p-3 rounded-xl bg-bg-surface border border-border-subtle hover:bg-bg-hover hover:shadow-elevation-low transition-all duration-200">
+              <div key={user.id} className="flex items-center justify-between p-3 rounded-xl bg-bg-surface border border-border-subtle hover:bg-bg-hover hover:shadow-elevation-low transition-all duration-200">
                 <div>
                   <p className="text-sm font-bold text-text-primary">{user.name}</p>
                   <p className="text-xs font-semibold text-text-muted">{user.email}</p>

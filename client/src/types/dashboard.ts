@@ -27,3 +27,23 @@ export interface StatsData {
   };
   dailyActivity: Array<{ date: string; count: number }>;
 }
+
+export interface AdminUser {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  skillLevel?: string;
+  createdAt: string;
+}
+
+export interface AdminStats {
+  totals: {
+    totalUsers: number;
+    totalProjects: number;
+    totalPublicProjects: number;
+    totalCompletedProjects: number;
+  };
+  recentUsers: AdminUser[];
+  projectsByCategory: Array<{ _id: string; count: number }>;
+}

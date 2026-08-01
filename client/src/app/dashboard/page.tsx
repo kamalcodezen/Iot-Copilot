@@ -16,7 +16,7 @@ import { getActivities, getDashboardStats as getActivityStats } from '@/lib/api/
 import { getProjects } from '@/lib/api/project';
 import { clientFetch } from '@/lib/api/client-api';
 import Button from '@/components/ui/Button';
-import { StatsData, Activity, Project } from '@/types';
+import { StatsData, Activity, Project, ApiResponse } from '@/types';
 
 function DashboardSkeleton() {
   return (
@@ -104,7 +104,7 @@ export default function DashboardPage() {
     setSuggestionsLoading(true);
     setAiError('');
     try {
-      const res = await clientFetch<any>('/ai/recommend');
+      const res = await clientFetch<ApiResponse<unknown>>('/ai/recommend');
       const data = res.data;
       let parsed = typeof data === 'string' ? JSON.parse(data) : data;
       if (Array.isArray(parsed)) setAiSuggestions(parsed);

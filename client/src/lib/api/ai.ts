@@ -1,10 +1,10 @@
 import { protectedFetch } from '../core/server';
-import { ApiResponse } from '@/types';
+import { AIMemory, ApiResponse } from '@/types';
 
 export const getChatHistory = async () => {
-  return await protectedFetch('/ai/chat/history') as ApiResponse<any[]>;
+  return await protectedFetch<ApiResponse<AIMemory[]>>('/ai/chat/history');
 };
 
 export const getRecommendations = async () => {
-  return await protectedFetch('/ai/recommend') as ApiResponse<string>;
+  return await protectedFetch<ApiResponse<string>>('/ai/recommend');
 };

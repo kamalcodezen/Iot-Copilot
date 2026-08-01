@@ -8,10 +8,11 @@ import IoTLoader from '@/components/ui/IoTLoader';
 import { getAdminUsers } from '@/lib/api/admin';
 import { updateUserRoleAction, deleteUserAction } from '@/lib/actions/admin';
 import { formatDate } from '@/utils/date';
+import { AdminUser } from '@/types';
 import toast from 'react-hot-toast';
 
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState<Array<{ _id: string; name: string; email: string; role: string; skillLevel: string; createdAt: string }>>([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
 
@@ -45,7 +46,7 @@ export default function AdminUsersPage() {
     try {
       await deleteUserAction(id);
       toast.success('User deleted');
-      setUsers((prev) => prev.filter((u) => u._id !== id));
+      setUsers((prev) => prev.filter((u) => u.id !== id));
     } catch {
       toast.error('Failed to delete user');
     }
@@ -86,7 +87,7 @@ export default function AdminUsersPage() {
               </thead>
               <tbody>
                 {users.map((user) => (
-                  <motion.tr key={user._id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="border-b border-border-subtle hover:bg-bg-surface/60 transition-colors duration-150">
+                  <motion.tr key={user.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="border-b border-border-subtle hover:bg-bg-surface/60 transition-colors duration-150">
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-accent-light flex items-center justify-center text-xs font-bold text-accent shadow-elevation-low">
@@ -101,7 +102,7 @@ export default function AdminUsersPage() {
                     <td className="p-4">
                       <div className="flex items-center gap-1.5">
                         {user.role === 'admin' && <Shield size={13} className="text-warning" />}
-                        <select value={user.role} onChange={(e) => handleRoleChange(user._id, e.target.value)}
+                        <select value={user.role} onChange={(e) => handleRoleChange(user.id, e.target.value)}
                           className="text-xs px-2.5 py-1.5 rounded-xl border border-border-default bg-bg-elevated text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent/25 transition-all duration-200">
                           <option value="user">User</option>
                           <option value="admin">Admin</option>
@@ -111,7 +112,7 @@ export default function AdminUsersPage() {
                     <td className="p-4"><Badge variant="info" size="sm">{user.skillLevel}</Badge></td>
                     <td className="p-4 text-sm text-text-secondary">{formatDate(user.createdAt)}</td>
                     <td className="p-4 text-right">
-                      <button onClick={() => handleDelete(user._id)} className="p-1.5 rounded-xl text-text-muted hover:text-error hover:bg-error/10 transition-all duration-200"><Trash2 size={16} /></button>
+                      <button onClick={() => handleDelete(user.id)} className="p-1.5 rounded-xl text-text-muted hover:text-error hover:bg-error/10 transition-all duration-200"><Trash2 size={16} /></button>
                     </td>
                   </motion.tr>
                 ))}

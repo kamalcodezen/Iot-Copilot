@@ -27,3 +27,12 @@ export interface PopulatedProject extends Omit<Project, 'userId'> {
     avatar?: string;
   };
 }
+
+// The server replaces the comment's userId with the author's public profile.
+export interface CommunityComment {
+  _id: string;
+  projectId: string;
+  userId: { name: string; avatar: string };
+  content: string;
+  createdAt: string;
+}
