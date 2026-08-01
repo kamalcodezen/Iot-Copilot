@@ -255,10 +255,12 @@ const withRetry = async <T>(operation: () => Promise<T>, maxRetries = 3): Promis
       // burns another unit of the per-minute quota. Each retry is a
       // duplicate generation request, so retrying quota errors exhausts
       // the free-tier budget (5 req/min) several times faster and turns
-      // every subsequent AI call into a 429. Only transient provider
-      // availability errors are retried.
+      // every subsequent AI call into a 429. Quota errors fail
+      // immediately and the friendly error is surfaced unchanged.
       const isQuotaError = /429|RESOURCE_EXHAUSTED|quota|rate\s*limit/i.test(raw);
-      const isTransientError = /503|UNAVAILABLE|INTERNAL/i.test(raw);
+      // Only transient failures are retried: upstream 5xx availability
+      // errors and network-level failures.
+      const isTransientError = /500|502|503|UNAVAILABLE|INTERNAL|ECONNRESET|ETIMEDOUT|EPIPE|ENOTFOUND|EAI_AGAIN|fetch\s+failed|socket\s+hang/i.test(raw);
       if (!isQuotaError && isTransientError && i < maxRetries - 1) {
         const delay = Math.pow(2, i) * 1500 + Math.random() * 1000;
         console.warn(`[AI Service] Transient API error. Retrying in ${Math.round(delay)}ms... (Attempt ${i + 1}/${maxRetries})`);
