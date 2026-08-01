@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Plus, Bot, Bug, Route, Compass, ArrowRight, Zap } from 'lucide-react';
+import SectionHeader from '@/components/layout/SectionHeader';
 
 const actions = [
   { href: '/projects/new', icon: Plus, label: 'New Project', description: 'Start a new IoT project', gradient: 'from-accent/20 to-blue-500/10', iconColor: 'text-accent' },
@@ -23,12 +24,7 @@ export default function QuickActions() {
 
   return (
     <div className="dashboard-card p-4 sm:p-5 lg:p-6" role="region" aria-label="Quick actions">
-      <div className="flex items-center gap-2 mb-1">
-        <div className="h-7 w-7 rounded-xl bg-gradient-to-br from-accent/20 to-blue-500/10 flex items-center justify-center shrink-0">
-          <Zap size={14} className="text-accent" aria-hidden="true" />
-        </div>
-        <h3 className="text-sm sm:text-base lg:text-lg font-bold tracking-tight text-text-primary">Quick Actions</h3>
-      </div>
+        <SectionHeader icon={Zap} title="Quick Actions" variant="card" />
       <p className="text-xs font-semibold text-text-tertiary mb-4 uppercase tracking-wide">Shortcuts to common tasks</p>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {actions.map((action, index) => {

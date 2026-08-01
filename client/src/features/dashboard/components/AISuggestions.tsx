@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Lightbulb, ArrowRight, Cpu, BookOpen, Wrench, Sparkles, AlertCircle, RefreshCw, Bot } from 'lucide-react';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
+import SectionHeader from '@/components/layout/SectionHeader';
 
 export interface AISuggestion {
   title: string;
@@ -31,13 +32,9 @@ const getIcon = (type: string) => {
 export default function AISuggestions({ suggestions, loading = false, error, onRetry }: AISuggestionsProps) {
   return (
     <div className="dashboard-card p-4 sm:p-5 lg:p-6 flex flex-col" role="region" aria-label="AI suggestions">
-      <div className="flex items-center gap-2 mb-1">
-        <div className="h-7 w-7 rounded-xl bg-gradient-to-br from-accent/20 to-blue-500/10 flex items-center justify-center shrink-0">
-          <Bot size={14} className="text-accent" aria-hidden="true" />
-        </div>
-        <h3 className="text-sm sm:text-base lg:text-lg font-bold tracking-tight text-text-primary">AI Suggestions</h3>
-        <Sparkles size={13} className="text-accent ml-auto animate-pulse-soft shrink-0" aria-hidden="true" />
-      </div>
+        <SectionHeader icon={Bot} title="AI Suggestions" variant="card">
+          <Sparkles size={13} className="text-accent ml-auto animate-pulse-soft shrink-0" aria-hidden="true" />
+        </SectionHeader>
       <p className="text-xs text-text-tertiary font-medium mb-4">Dynamic recommendations based on your progress</p>
 
       <div className="flex-1 space-y-3">

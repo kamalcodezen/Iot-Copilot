@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { BarChart3, Target } from 'lucide-react';
+import SectionHeader from '@/components/layout/SectionHeader';
 
 const data = [
   { skill: 'Hardware', value: 70, fullMark: 100 },
@@ -25,12 +26,7 @@ export default function SkillRadar() {
   if (!data || data.length === 0) {
     return (
       <div className="dashboard-card p-5 sm:p-6" role="region" aria-label="Skill radar chart">
-        <div className="flex items-center gap-2 mb-1">
-          <div className="h-7 w-7 rounded-xl bg-gradient-to-br from-violet-500/20 to-purple-500/10 flex items-center justify-center shrink-0">
-            <Target size={14} className="text-violet-400" aria-hidden="true" />
-          </div>
-          <h3 className="text-sm sm:text-base lg:text-lg font-bold tracking-tight text-text-primary">Skill Radar</h3>
-        </div>
+        <SectionHeader icon={Target} title="Skill Radar" variant="card" tone="info" />
         <p className="text-xs font-semibold text-text-tertiary mb-6 uppercase tracking-wide">Your IoT skill levels</p>
         <div className="h-64 flex flex-col items-center justify-center text-text-tertiary">
           <div className="h-12 w-12 rounded-2xl bg-accent-light flex items-center justify-center mb-3">
@@ -45,18 +41,12 @@ export default function SkillRadar() {
 
   return (
     <div className="dashboard-card p-4 sm:p-5 lg:p-6" role="region" aria-label="Skill radar chart">
-      <div className="flex items-center justify-between mb-1">
-        <div className="flex items-center gap-2">
-          <div className="h-7 w-7 rounded-xl bg-gradient-to-br from-violet-500/20 to-purple-500/10 flex items-center justify-center shrink-0">
-            <Target size={14} className="text-violet-400" aria-hidden="true" />
-          </div>
-          <h3 className="text-sm sm:text-base lg:text-lg font-bold tracking-tight text-text-primary">Skill Radar</h3>
-        </div>
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-bg-surface border border-border-default">
+      <SectionHeader icon={Target} title="Skill Radar" variant="card" tone="info">
+        <div className="ml-auto flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-bg-surface border border-border-default">
           <span className="text-[11px] font-bold text-text-secondary tabular-nums">{avgScore}%</span>
           <span className="text-[10px] font-semibold text-text-tertiary">avg</span>
         </div>
-      </div>
+      </SectionHeader>
       <p className="text-xs font-semibold text-text-tertiary mb-4 uppercase tracking-wide">Your IoT skill levels</p>
       <div className="h-56 sm:h-64">
         <ResponsiveContainer width="100%" height="100%">

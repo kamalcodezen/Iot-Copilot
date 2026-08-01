@@ -6,6 +6,7 @@ import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import Avatar from '@/components/ui/Avatar';
 import IoTLoader from '@/components/ui/IoTLoader';
+import SectionHeader from '@/components/layout/SectionHeader';
 import { useAuthStore } from '@/store/authStore';
 import { formatDate } from '@/utils/date';
 import Link from 'next/link';
@@ -46,12 +47,7 @@ export default function ProfilePage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
         <Card>
-          <div className="flex items-center gap-2 mb-4">
-            <div className="h-7 w-7 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/10 flex items-center justify-center">
-              <Medal size={14} className="text-amber-400" />
-            </div>
-            <h3 className="text-sm font-bold text-text-primary uppercase tracking-wide">Stats</h3>
-          </div>
+          <SectionHeader icon={Medal} title="Stats" tone="warning" />
           <div className="grid grid-cols-2 gap-3">
             {[
               { label: 'Projects', value: user.stats.totalProjects, gradient: 'from-accent/20 to-blue-500/10', color: 'text-accent' },
@@ -68,12 +64,7 @@ export default function ProfilePage() {
         </Card>
 
         <Card>
-          <div className="flex items-center gap-2 mb-4">
-            <div className="h-7 w-7 rounded-xl bg-gradient-to-br from-accent/20 to-blue-500/10 flex items-center justify-center">
-              <User size={14} className="text-accent" />
-            </div>
-            <h3 className="text-sm font-bold text-text-primary uppercase tracking-wide">Details</h3>
-          </div>
+          <SectionHeader icon={User} title="Details" />
           <div className="space-y-3">
             <div className="flex items-center gap-3 text-sm p-2.5 rounded-xl bg-bg-surface border border-border-default">
               <Mail size={15} className="text-text-muted shrink-0" />
@@ -104,12 +95,7 @@ export default function ProfilePage() {
 
       {user.badges && user.badges.length > 0 && (
         <Card>
-          <div className="flex items-center gap-2 mb-4">
-            <div className="h-7 w-7 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/10 flex items-center justify-center">
-              <Award size={14} className="text-amber-400" />
-            </div>
-            <h3 className="text-sm font-bold text-text-primary uppercase tracking-wide">Badges</h3>
-          </div>
+          <SectionHeader icon={Award} title="Badges" tone="warning" />
           <div className="flex flex-wrap gap-3">
             {user.badges.map((badge: string, i: number) => (
               <div key={i} className="bg-gradient-to-br from-amber-500/10 to-orange-500/5 border border-amber-500/20 rounded-xl px-4 py-3 text-center transition-all duration-200 hover:shadow-elevation-medium hover:-translate-y-0.5">

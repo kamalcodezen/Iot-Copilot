@@ -7,6 +7,7 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import IoTLoader from '@/components/ui/IoTLoader';
+import SectionHeader from '@/components/layout/SectionHeader';
 import { useAuthStore } from '@/store/authStore';
 import { authClient } from '@/lib/auth-client';
 import { getErrorMessage } from '@/utils/errors';
@@ -161,12 +162,7 @@ export default function SettingsPage() {
 
         {/* Logout */}
         <Card>
-          <div className="flex items-center gap-2 mb-4">
-            <div className="h-7 w-7 rounded-xl bg-gradient-to-br from-error/20 to-red-500/10 flex items-center justify-center">
-              <LogOut size={13} className="text-error" />
-            </div>
-            <h3 className="text-sm font-bold text-text-primary uppercase tracking-wide">Sign Out</h3>
-          </div>
+          <SectionHeader icon={LogOut} title="Sign Out" tone="error" iconSize={13} />
           <p className="text-sm font-semibold text-text-tertiary mb-4">Sign out of your account on this device.</p>
           <Button variant="danger" onClick={handleLogout} isLoading={isLoggingOut}>
             <LogOut size={16} className="mr-2" />

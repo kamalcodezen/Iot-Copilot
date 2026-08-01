@@ -6,6 +6,7 @@ import { Shield, Users, FolderKanban, BarChart3, AlertTriangle, RefreshCw, Trend
 import Card from '@/components/ui/Card';
 import IoTLoader from '@/components/ui/IoTLoader';
 import PageHeader from '@/components/layout/PageHeader';
+import SectionHeader from '@/components/layout/SectionHeader';
 import { getAdminStats } from '@/lib/api/admin';
 import { formatDate } from '@/utils/date';
 import { AdminStats } from '@/types';
@@ -70,12 +71,7 @@ export default function AdminPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
         <Card>
-          <div className="flex items-center gap-2 mb-4">
-            <div className="h-7 w-7 rounded-xl bg-gradient-to-br from-accent/20 to-blue-500/10 flex items-center justify-center">
-              <Users size={14} className="text-accent" />
-            </div>
-            <h3 className="text-sm font-bold text-text-primary uppercase tracking-wide">Recent Users</h3>
-          </div>
+          <SectionHeader icon={Users} title="Recent Users" />
           <div className="space-y-2">
             {stats?.recentUsers?.map((user) => (
               <div key={user.id} className="flex items-center justify-between p-3 rounded-xl bg-bg-surface border border-border-subtle hover:bg-bg-hover hover:shadow-elevation-low transition-all duration-200">
@@ -90,12 +86,7 @@ export default function AdminPage() {
         </Card>
 
         <Card>
-          <div className="flex items-center gap-2 mb-4">
-            <div className="h-7 w-7 rounded-xl bg-gradient-to-br from-violet-500/20 to-purple-500/10 flex items-center justify-center">
-              <BarChart3 size={14} className="text-violet-400" />
-            </div>
-            <h3 className="text-sm font-bold text-text-primary uppercase tracking-wide">Projects by Category</h3>
-          </div>
+          <SectionHeader icon={BarChart3} title="Projects by Category" tone="info" />
           <div className="space-y-2">
             {stats?.projectsByCategory?.map((cat) => (
               <div key={cat._id} className="flex items-center justify-between p-3 rounded-xl bg-bg-surface border border-border-subtle hover:bg-bg-hover hover:shadow-elevation-low transition-all duration-200">

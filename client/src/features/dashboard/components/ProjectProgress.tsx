@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { FolderKanban, Plus, Layers } from 'lucide-react';
 import { Project } from '@/types';
 import Badge from '@/components/ui/Badge';
+import SectionHeader from '@/components/layout/SectionHeader';
 
 interface ProjectProgressProps {
   projects: Project[];
@@ -16,12 +17,7 @@ export default function ProjectProgress({ projects }: ProjectProgressProps) {
   if (displayProjects.length === 0) {
     return (
       <div className="dashboard-card p-4 sm:p-5 lg:p-6 flex flex-col" role="region" aria-label="Project progress">
-        <div className="flex items-center gap-2 mb-1">
-          <div className="h-7 w-7 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 flex items-center justify-center shrink-0">
-            <Layers size={14} className="text-emerald-400" aria-hidden="true" />
-          </div>
-          <h3 className="text-sm sm:text-base lg:text-lg font-bold tracking-tight text-text-primary">Project Progress</h3>
-        </div>
+        <SectionHeader icon={Layers} title="Project Progress" variant="card" tone="success" />
         <p className="text-xs font-semibold text-text-tertiary mb-4 uppercase tracking-wide">Your ongoing projects</p>
         <div className="flex-1 flex flex-col items-center justify-center text-center py-8">
           <div className="h-12 w-12 rounded-2xl bg-accent-light flex items-center justify-center mb-3 shadow-elevation-low">
@@ -43,15 +39,9 @@ export default function ProjectProgress({ projects }: ProjectProgressProps) {
 
   return (
     <div className="dashboard-card p-4 sm:p-5 lg:p-6 flex flex-col" role="region" aria-label="Project progress">
-      <div className="flex items-center justify-between mb-1">
-        <div className="flex items-center gap-2">
-          <div className="h-7 w-7 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 flex items-center justify-center shrink-0">
-            <Layers size={14} className="text-emerald-400" aria-hidden="true" />
-          </div>
-          <h3 className="text-sm sm:text-base lg:text-lg font-bold tracking-tight text-text-primary">Project Progress</h3>
-        </div>
-        <Link href="/projects" className="text-[11px] font-bold text-accent hover:text-accent-hover transition-colors uppercase tracking-wide">View all</Link>
-      </div>
+      <SectionHeader icon={Layers} title="Project Progress" variant="card" tone="success">
+        <Link href="/projects" className="ml-auto text-[11px] font-bold text-accent hover:text-accent-hover transition-colors uppercase tracking-wide">View all</Link>
+      </SectionHeader>
       <p className="text-xs font-semibold text-text-tertiary mb-4 uppercase tracking-wide">Your ongoing projects</p>
 
       <div className="flex-1 space-y-2.5">

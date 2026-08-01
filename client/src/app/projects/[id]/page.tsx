@@ -10,6 +10,7 @@ import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import ProjectTimeline from '@/features/projects/components/ProjectTimeline';
 import IoTLoader from '@/components/ui/IoTLoader';
+import SectionHeader from '@/components/layout/SectionHeader';
 import { getProjectById as getProject } from '@/lib/api/project';
 import { deleteProjectAction } from '@/lib/actions/project';
 import { Project } from '@/types';
@@ -98,12 +99,7 @@ export default function ProjectDetailPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
             <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="h-7 w-7 rounded-xl bg-gradient-to-br from-accent/20 to-blue-500/10 flex items-center justify-center">
-                  <Cpu size={14} className="text-accent" />
-                </div>
-                <h3 className="text-sm font-bold text-text-primary uppercase tracking-wide">Components</h3>
-              </div>
+                <SectionHeader icon={Cpu} title="Components" />
               {project.components.length > 0 ? (
                 <ul className="space-y-2">
                   {project.components.map((c, i) => (
@@ -116,12 +112,7 @@ export default function ProjectDetailPage() {
               ) : <p className="text-sm font-medium text-text-muted p-3 rounded-xl bg-bg-surface border border-border-default">No components listed</p>}
             </div>
             <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="h-7 w-7 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 flex items-center justify-center">
-                  <Layers size={14} className="text-emerald-400" />
-                </div>
-                <h3 className="text-sm font-bold text-text-primary uppercase tracking-wide">Timeline</h3>
-              </div>
+                <SectionHeader icon={Layers} title="Timeline" tone="success" />
               <ProjectTimeline milestones={milestones} />
             </div>
           </div>
@@ -130,24 +121,14 @@ export default function ProjectDetailPage() {
 
       {project.code && (
         <Card>
-          <div className="flex items-center gap-2 mb-4">
-            <div className="h-7 w-7 rounded-xl bg-gradient-to-br from-violet-500/20 to-purple-500/10 flex items-center justify-center">
-              <Code size={14} className="text-violet-400" />
-            </div>
-            <h3 className="text-sm font-bold text-text-primary uppercase tracking-wide">Code</h3>
-          </div>
+            <SectionHeader icon={Code} title="Code" tone="info" />
           <pre className="bg-bg-elevated border border-border-default rounded-xl p-4 overflow-x-auto"><code className="code-font text-sm text-text-primary whitespace-pre">{project.code}</code></pre>
         </Card>
       )}
 
       {project.learningOutcomes.length > 0 && (
         <Card>
-          <div className="flex items-center gap-2 mb-4">
-            <div className="h-7 w-7 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/10 flex items-center justify-center">
-              <ArrowLeft size={14} className="text-amber-400 rotate-90" />
-            </div>
-            <h3 className="text-sm font-bold text-text-primary uppercase tracking-wide">Learning Outcomes</h3>
-          </div>
+            <SectionHeader icon={ArrowLeft} title="Learning Outcomes" tone="warning" iconClassName="rotate-90" />
           <ul className="space-y-2">
             {project.learningOutcomes.map((outcome, i) => (
               <li key={i} className="flex items-start gap-2 text-sm font-semibold text-text-secondary p-2.5 rounded-xl bg-bg-surface border border-border-default">

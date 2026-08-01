@@ -8,6 +8,7 @@ import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import PageHeader from '@/components/layout/PageHeader';
+import SectionHeader from '@/components/layout/SectionHeader';
 import { getInterviewQuestionsAction, submitInterviewAnswerAction } from '@/lib/actions/ai';
 import toast from 'react-hot-toast';
 
@@ -121,12 +122,7 @@ export default function InterviewCoachPage() {
 
           {feedback && (
             <Card>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="h-7 w-7 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 flex items-center justify-center">
-                  <MessageSquare size={14} className="text-emerald-400" />
-                </div>
-                <h3 className="text-sm font-bold text-text-primary uppercase tracking-wide">Feedback</h3>
-              </div>
+              <SectionHeader icon={MessageSquare} title="Feedback" tone="success" />
               <div className="text-sm font-semibold text-text-secondary whitespace-pre-line leading-relaxed">{feedback}</div>
             </Card>
           )}

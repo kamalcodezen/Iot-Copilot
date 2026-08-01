@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ActivityIcon, Clock, History } from 'lucide-react';
 import { Activity } from '@/types';
 import { formatDate } from '@/utils/date';
+import SectionHeader from '@/components/layout/SectionHeader';
 import {
   FolderKanban,
   Bot,
@@ -36,12 +37,7 @@ export default function RecentActivity({ activities }: RecentActivityProps) {
 
   return (
     <div className="dashboard-card p-4 sm:p-5 lg:p-6 flex flex-col" role="region" aria-label="Recent activity">
-      <div className="flex items-center gap-2 mb-1">
-        <div className="h-7 w-7 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/10 flex items-center justify-center shrink-0">
-          <History size={14} className="text-amber-400" aria-hidden="true" />
-        </div>
-        <h3 className="text-sm sm:text-base lg:text-lg font-bold tracking-tight text-text-primary">Recent Activity</h3>
-      </div>
+        <SectionHeader icon={History} title="Recent Activity" variant="card" tone="warning" />
       <p className="text-xs font-semibold text-text-tertiary mb-4 uppercase tracking-wide">Your latest actions</p>
 
       <div className="flex-1 min-h-0">
