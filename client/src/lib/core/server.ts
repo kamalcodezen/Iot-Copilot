@@ -1,6 +1,5 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { getUserSession } from './session';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -69,14 +68,6 @@ export const serverFetch = async <T>(endpoint: string, options: RequestInit & { 
   }
 
   return response.json();
-};
-
-export const protectedFetch = async <T>(endpoint: string, options?: RequestInit & { params?: Record<string, string | number | boolean | undefined> }): Promise<T> => {
-  const session = await getUserSession();
-  if (!session) {
-    redirect('/auth/login');
-  }
-  return await serverFetch<T>(endpoint, options);
 };
 
 export const serverMutation = async <T>(endpoint: string, data?: unknown, method: string = 'POST'): Promise<T> => {
