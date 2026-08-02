@@ -60,11 +60,9 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   const reqStart = Date.now();
   const traceId = Math.random().toString(36).substring(7);
   (req as any).traceId = traceId;
-  console.log(`[${reqStart}] [Backend] Express middleware start [${traceId}] ${req.method} ${req.url}`);
   
   const originalJson = res.json;
   res.json = function (body) {
-    console.log(`[${Date.now()}] [Backend] Response (json) sent [${traceId}] ${req.method} ${req.url}`);
     return originalJson.call(this, body);
   };
   next();

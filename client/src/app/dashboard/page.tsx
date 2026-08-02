@@ -72,7 +72,6 @@ function DashboardSkeleton() {
 }
 
 export default function DashboardPage() {
-  console.log(`[${Date.now()}] [Browser] DashboardPage rendered`);
   const { user } = useAuthStore();
   const [stats, setStats] = useState<StatsData | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -84,17 +83,14 @@ export default function DashboardPage() {
   const [aiError, setAiError] = useState('');
 
   const fetchData = async () => {
-    console.log(`[${Date.now()}] [Browser] fetchData started`);
     setLoading(true);
     setError(false);
     try {
-      console.log(`[${Date.now()}] [Browser] HTTP request (dashboard data) start`);
       const [statsRes, activitiesRes, projectsRes] = await Promise.all([
         getActivityStats(),
         getActivities({ limit: '10' }),
         getProjects({ limit: '4' }),
       ]);
-      console.log(`[${Date.now()}] [Browser] HTTP request (dashboard data) end`);
       setStats(statsRes.data);
       setActivities(activitiesRes.data);
       setProjects(projectsRes.data);
@@ -106,18 +102,14 @@ export default function DashboardPage() {
   };
 
   const fetchAI = async () => {
-    console.log(`[${Date.now()}] [Browser] fetchAI started`);
     setSuggestionsLoading(true);
     setAiError('');
     try {
-      console.log(`[${Date.now()}] [Browser] fetchAI HTTP request start`);
       const res = await clientFetch<ApiResponse<unknown>>('/ai/recommend');
-      console.log(`[${Date.now()}] [Browser] fetchAI HTTP request end`);
       const data = res.data;
       let parsed = typeof data === 'string' ? JSON.parse(data) : data;
       if (Array.isArray(parsed)) setAiSuggestions(parsed);
     } catch (error) {
-      console.log(`[${Date.now()}] [Browser] fetchAI HTTP request error`);
       setAiError(getErrorMessage(error, 'Could not load AI suggestions.'));
     } finally {
       setSuggestionsLoading(false);

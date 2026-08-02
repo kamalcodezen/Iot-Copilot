@@ -253,25 +253,16 @@ export const submitInterviewAnswer = asyncHandler(async (req: AuthRequest, res: 
 
 export const recommendNext = asyncHandler(async (req: AuthRequest, res: Response) => {
   const traceId = (req as any).traceId || Math.random().toString(36).substring(7);
-  console.log(`[${Date.now()}] [Backend] Controller (recommendNext) start [${traceId}]`);
   
   const { id: userId } = requireUser(req);
 
-  console.log(`[${Date.now()}] [Backend] MongoDB (getRecentMemory) start [${traceId}]`);
   const recentMemories = await getRecentMemory(userId, 20);
-  console.log(`[${Date.now()}] [Backend] MongoDB (getRecentMemory) end [${traceId}]`);
   
-  console.log(`[${Date.now()}] [Backend] MongoDB (getUserById) start [${traceId}]`);
   const user = await getUserById(userId);
-  console.log(`[${Date.now()}] [Backend] MongoDB (getUserById) end [${traceId}]`);
   
   const prompt = buildRecommendPrompt(buildContextString(recentMemories), user?.skillLevel || 'beginner');
   
-  console.log(`[${Date.now()}] [Backend] Service (generateContent) start [${traceId}]`);
   const response = await generateContent(prompt);
-  console.log(`[${Date.now()}] [Backend] Service (generateContent) end [${traceId}]`);
 
-  console.log(`[${Date.now()}] [Backend] Response (sendData) start [${traceId}]`);
   sendData(res, response);
-  console.log(`[${Date.now()}] [Backend] Controller (recommendNext) end [${traceId}]`);
 });
