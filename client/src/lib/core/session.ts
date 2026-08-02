@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { serverFetch } from './server';
 import { User } from '@/types';
 import { cookies } from 'next/headers';
+import { cache } from 'react';
 
 export interface SessionData {
   user: User;
@@ -16,7 +17,7 @@ export interface SessionData {
   };
 }
 
-export const getUserSession = async () => {
+export const getUserSession = cache(async () => {
   try {
     const data = await serverFetch<SessionData>('/auth/get-session');
     if (!data || !data.user) return null;
@@ -33,7 +34,7 @@ export const getUserSession = async () => {
   } catch (error) {
     return null;
   }
-};
+});
 
 export const requireAuth = async () => {
   const session = await getUserSession();
