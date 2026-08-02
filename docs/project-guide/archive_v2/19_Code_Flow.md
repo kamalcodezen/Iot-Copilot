@@ -8,10 +8,10 @@ Let's trace the flow of a user requesting their Dashboard data.
 1. **Component Mount:** `client/src/app/dashboard/page.tsx` mounts in the browser.
 2. **State Check:** `useAuthStore()` (from `store/authStore.ts`) confirms the user is authenticated.
 3. **Trigger Fetch:** The `useEffect` hook in `DashboardPage` calls `fetchData()`.
-4. **API Wrapper:** `fetchData` invokes `getActivityStats()` located in `lib/api/dashboard.ts`.
-5. **Client Fetch Util:** The request is passed to `clientFetch<StatsData>('/dashboard/stats')` (`lib/api/client-api.ts`).
-   - `clientFetch` prepends `NEXT_PUBLIC_API_URL` (or proxies via `/api` in development).
-   - It automatically includes credentials (cookies) so Better Auth can validate the session.
+4. **API Wrapper (Parallel Execution):** `fetchData` invokes multiple Server Actions concurrently via `Promise.all`: `getActivityStats()`, `getActivities()`, and `getProjects()`. This parallel database query design massively improves Dashboard loading performance.
+5. **Server Fetch Util:** Each action utilizes `serverFetch<T>('/endpoint')` (`lib/core/server.ts`).
+   - `serverFetch` executes on the Next.js server, prepends the backend `API_URL`.
+   - It automatically extracts and forwards Next.js credentials (cookies) so Better Auth can validate the session.
 
 ## 2. Server-Side Ingress (Express App)
 1. **HTTP Entry:** The request hits `server/src/app.ts`.

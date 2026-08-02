@@ -139,8 +139,10 @@ graph TD
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS with a custom Glassmorphic design system (`globals.css` / `tailwind.config.ts`).
 - **State Management:** Zustand (`client/src/store/`) is used for global state, specifically for Authentication (`authStore.ts`), which acts as a bridge to the Better Auth client.
-- **Data Fetching:** Native fetch API wrapped in custom utilities (`lib/api/client-api.ts`), combined with React `useEffect` and custom hooks for component-level data binding.
+- **Data Fetching:** Native fetch API wrapped in custom utilities (`lib/api/client-api.ts`), combined with React `useEffect` and custom hooks for component-level data binding. Uses `Promise.all` for highly performant, parallel database queries where applicable.
 - **Animations:** Framer Motion is heavily utilized for complex SVG animations, route transitions, and interactive UI micro-animations.
+- **Smooth Scrolling:** Lenis integration provides global, performant smooth scrolling across all App Router pages.
+- **Accessibility & Polish:** Highly polished UI with accessible contrast ratios, screen-reader-friendly semantic HTML, and extensive glassmorphic micro-interactions.
 
 ### Request Flow (Client)
 1. **User Interaction:** User clicks a button or navigates to a route.
@@ -281,7 +283,7 @@ Server Component (app/page.tsx)
 ↓
 API Fetcher (lib/api/*.ts)
 ↓
-Core Fetch (lib/core/server.ts -> protectedFetch)
+Core Fetch (lib/core/server.ts -> serverFetch)
 ↓
 Express Backend (GET)
 ↓
@@ -393,13 +395,6 @@ The Core layer is the foundation of the refactor. It normalizes HTTP requests an
   - `buildUrl(endpoint, params)`: Helper to construct absolute URLs appending the backend `API_URL`.
   - `authHeaders()`: Asynchronously reads Next.js `cookies()` and extracts the session token to attach to outgoing requests.
   - `serverFetch<T>(endpoint, options)`: The core fetch wrapper. Automatically injects `Content-Type: application/json` and Authorization headers. Handles 401 Unauthorized responses by redirecting to `/auth/login`. Normalizes error responses.
-  - `protectedFetch<T>(endpoint, options)`: A wrapper around `serverFetch` that first explicitly checks if a valid session exists via `getUserSession()`.
   - `serverMutation<T>(endpoint, data, method)`: A wrapper for actions. Automatically stringifies JSON payloads or handles `FormData` for file uploads.
 
-### lib/core/session.ts
-- **Purpose**: Manages user authentication state and Role-Based Access Control (RBAC) on the server.
-- **Functions**:
-  - `getUserSession()`: Calls `GET /auth/get-session` on the backend. Parses JSON strings for `socialLinks` and `preferences`. Returns the `SessionData` or `null`.
-  - `requireAuth()`: Enforces authentication. If `getUserSession()` returns null, instantly redirects to `/auth/login`.
-  - `requireRole(role: string)`: Enforces RBAC. Checks if the user has the required role (e.g., 'admin'). If not, redirects to `/dashboard`.
-  - `getUserToken()`: Helper to extract the raw `better-auth.session_token` from cookies.
+

@@ -169,22 +169,19 @@ Authentication is managed via a combination of Next.js cookies, custom API fetch
 4. Token is set as an `httpOnly` cookie (`better-auth.session_token`).
 
 ### Session Persistence
-- On every page load, Next.js Server Components that require auth call `requireAuth()` from `lib/core/session.ts`.
-- `requireAuth()` calls `getUserSession()`.
-- `getUserSession()` sends a `GET /auth/get-session` request to the backend.
-- Crucially, it uses `authHeaders()` from `lib/core/server.ts` to manually forward the Next.js cookies to the backend.
-- The backend validates the token and returns the `User` object.
+- On every page load, Next.js Server Components that require secure data call their corresponding Server Actions.
+- These Server Actions utilize `serverFetch()` from `lib/core/server.ts`.
+- `serverFetch()` automatically extracts all Next.js cookies via `authHeaders()` and forwards them to the Express backend.
 
 ### Protected Routes (Middleware vs Core)
-- Most route protection is done inside Server Components by invoking `requireAuth()` at the top of the component:
-  ```typescript
-  const session = await requireAuth();
-  ```
-- If the session is null, `requireAuth()` calls `redirect('/auth/login')`.
+- Route protection is inherently handled by the Express backend API.
+- If a user tries to fetch protected data (e.g., `/activities`), `serverFetch` forwards the request.
+- The Express backend's Better Auth middleware evaluates the session token. If invalid, it returns `401 Unauthorized`.
+- `serverFetch` natively intercepts any `401` response and automatically calls Next.js `redirect('/auth/login')`, effectively securing the route and ejecting the user.
 
 ### Authorization (Role-Based Access)
-- For admin routes, `requireRole('admin')` is called.
-- It first gets the session via `requireAuth()`, then checks `session.user.role === 'admin'`. If false, redirects to `/dashboard`.
+- The Express backend manages authorization constraints (e.g., checking if the user is an admin before returning stats).
+- UI-level hiding of admin links is managed reactively via the client-side `useAuthStore` state.
 
 ### Logout
 - Triggers a call to `POST /auth/logout`.

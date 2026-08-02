@@ -90,6 +90,7 @@ Welcome to the IoT Copilot engineering team. This guide outlines how to set up y
 - **Feature-Driven Architecture:** Do not dump everything into `components/`. If a component contains heavy business logic (e.g., `ProjectTimeline`), place it in `features/projects/components/`.
 - **Styling:** Use Tailwind CSS exclusively. Use the `cn()` utility to merge dynamic classes safely. Do not use inline styles unless absolutely necessary for dynamic layout calculations.
 - **Client Components:** Next.js App Router defaults to Server Components. If you need `useState` or `useEffect` (which is common in this app), you must add `'use client';` at the very top of the file.
+- **Accessibility & Polish:** Ensure all interactive elements are accessible. Use proper semantic HTML, ARIA labels, and maintain high contrast ratios for the glassmorphic UI elements.
 
 ### Backend (Express & Node.js)
 - **Thin Controllers:** Controllers should only parse requests and format responses. Heavy business logic must live in `services/`.
@@ -101,6 +102,7 @@ Welcome to the IoT Copilot engineering team. This guide outlines how to set up y
 ### Frontend Debugging
 - **React Developer Tools:** Use the browser extension to inspect component state, especially the Zustand `authStore`.
 - **Framer Motion Issues:** If animations are glitching, ensure you are not passing `undefined` to SVG attributes (e.g., `r={node.r || 10}`). This will cause hydration/rendering errors.
+- **Lenis Smooth Scrolling:** If scroll locking or smooth scrolling breaks, ensure the global Lenis instance is not conflicting with `overflow: hidden` on nested absolute containers.
 
 ### Backend Debugging
 - **Better Auth:** If authentication fails, check the server console. Better Auth logs errors verbosely in development mode.
@@ -201,7 +203,7 @@ Here are the primary backend endpoints consumed by the client's `lib/` layer:
 ### Adding a New API (Query)
 1. Navigate to `client/src/lib/api/`.
 2. Create or open the relevant file (e.g., `devices.ts`).
-3. Export an async function utilizing `protectedFetch` for authenticated calls.
+3. Export an async function utilizing `serverFetch` for API calls.
 4. Add the `"use server"` directive at the top if it's a new file.
 
 ### Adding a New Server Action (Mutation)
@@ -213,7 +215,7 @@ Here are the primary backend endpoints consumed by the client's `lib/` layer:
 ### Adding a New Page
 1. Create a folder in `client/src/app/`, e.g., `app/devices/page.tsx`.
 2. Make it an async Server Component.
-3. Call `const session = await requireAuth();` to protect it.
+3. If data is required, call your API functions. Unauthorized requests will be intercepted and redirected by `serverFetch`.
 4. Call your new API function: `const devices = await getDevices();`.
 
 ---
@@ -223,10 +225,10 @@ Here are the primary backend endpoints consumed by the client's `lib/` layer:
 ### 1. Creating a new API query (`lib/api/devices.ts`)
 ```typescript
 "use server";
-import { protectedFetch } from '../core/server';
+import { serverFetch } from '../core/server';
 
 export const getDevices = async () => {
-  return await protectedFetch('/devices');
+  return await serverFetch('/devices');
 };
 ```
 
@@ -274,8 +276,7 @@ export default async function DevicesPage() {
 ```text
 client/src/lib/
  ├── core/
- │   ├── server.ts
- │   └── session.ts
+ │   └── server.ts
  ├── actions/
  │   ├── admin.ts, ai.ts, community.ts, learning.ts, project.ts, user.ts
  └── api/
@@ -294,3 +295,22 @@ client/src/lib/
 
 ### Future Scalability
 This decoupled structure allows the Next.js frontend to scale independently from the Express backend. If the backend needs to switch to a microservice architecture in the future, only the `API_URL` and routes inside the `lib/` wrappers will need to be updated. The Next.js components remain untouched.
+
+## SECTION 17 — Technical Debt & Unused Code
+During the documentation process, the following areas were identified as potential technical debt or requiring future cleanup:
+
+1. **Unused Code / Dead Code:**
+   - The original custom JWT authentication logic (`server/src/middlewares/old_auth.ts` or similar remnants) if any remain, as the project has fully migrated to Better Auth.
+   - Any hardcoded JWT token generation utilities in the backend.
+
+2. **Security Improvements:**
+   - **Rate Limiting:** Implement a strict Express rate limiter (`express-rate-limit`) on all `/api/ai/*` routes to prevent abuse of the Gemini API key.
+   - **Environment Variables:** Rotate `BETTER_AUTH_SECRET` before pushing to a production environment.
+
+3. **Performance Improvements:**
+   - **Database Indexes:** Ensure compound indexes on the `Activity` collection are utilized effectively, as this collection will grow exponentially compared to others.
+   - **Frontend Bundle Size:** Monitor the impact of `framer-motion` and `recharts`. Consider dynamically importing heavy chart components only when they scroll into view.
+
+4. **Scalability:**
+   - **WebSockets:** Transition the Dashboard from HTTP Polling to WebSockets or Server-Sent Events (SSE) for real-time activity updates.
+   - **Microservices:** If the AI processing becomes computationally expensive or requires heavy background jobs (e.g., parsing massive log files), consider offloading the AI logic to a dedicated Python/FastAPI microservice, leaving Express to handle pure CRUD.
