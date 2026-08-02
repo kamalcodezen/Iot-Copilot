@@ -1,160 +1,167 @@
-# IoT Copilot AI
+# IoT Copilot
 
-> Your AI Senior IoT Engineer — Learn, build, and debug IoT projects with personalized AI guidance.
+**IoT Copilot: a full-stack AI engineering suite built as a decoupled Next.js and Express architecture.**
 
-## Overview
+## 1. Project Title & Tagline
+**IoT Copilot**: An intelligent, AI-powered companion designed to simplify the design, learning, and deployment of Industrial Internet of Things (IIoT) systems by unifying hardware schematics, cloud integrations, and software debugging into a single platform.
 
-IoT Copilot AI is a full-stack Agentic AI platform that helps beginners and intermediate learners master IoT through personalized AI mentorship. Instead of scattered YouTube tutorials, forum posts, and documentation, it provides a single intelligent platform that acts like an experienced Senior IoT Engineer.
+## 2. Problem Statement
+IoT development is notoriously fragmented across multiple domains: hardware wiring diagrams, microcontroller IDEs, cloud infrastructure setups, and isolated debugging tools. This increases context-switching, slows down rapid prototyping, and creates a steep learning curve for developers transitioning into hardware engineering.
 
-## Project Purpose
-**IoT Copilot** is a state-of-the-art, AI-powered platform engineered to simplify the design, learning, and deployment of Industrial Internet of Things (IIoT) systems. It bridges the gap between hardware engineering and software development by providing an intelligent companion that assists users throughout the entire lifecycle of an IoT project—from initial concept and architectural design to debugging and deployment.
+IoT Copilot targets students, software engineers, and hardware architects by providing one platform for:
+- **Design** (AI-generated project architecture and component recommendations)
+- **Debugging** (Log analysis and root-cause identification for sensors/MCUs)
+- **Education** (Personalized learning paths, mock interviews, and an interactive AI Mentor)
 
-## Why This Project Exists
-The complexity of IoT ecosystems (involving sensors, microcontrollers, edge gateways, cloud infrastructure, and data analytics) often creates a steep learning curve for developers and engineers. IoT Copilot exists to:
-- **Lower the Barrier to Entry:** Provide step-by-step guidance for beginners and students.
-- **Accelerate Development:** Offer AI-driven architectural suggestions, code generation, and hardware recommendations for professionals.
-- **Centralize Knowledge:** Consolidate disparate documentation, tutorials, and debugging tools into a single, cohesive dashboard.
+## 3. Solution
+IoT Copilot combines a highly interactive frontend with a robust, scalable Express backend backed by MongoDB, Better Auth, and Google Gemini AI services.
 
-## The Problem It Solves
-- **Fragmented Workflows:** Engineers typically juggle multiple tools for hardware schematics, backend coding, and project management. IoT Copilot brings project tracking and AI assistance into one interface.
-- **Debugging Complexity:** Diagnosing hardware-software integration issues is notoriously difficult. The **AI Debugger** feature analyzes stack traces and sensor data to pinpoint root causes.
-- **Skill Gaps:** The **AI Mentor**, **Interview Coach**, and **Learning Path** modules provide personalized education, helping users upskill exactly where they have knowledge gaps.
+At a high level:
+- Users authenticate securely via Better Auth.
+- The Next.js frontend utilizes Server Actions and parallel data fetching for rapid time-to-interactive.
+- AI pipelines generate interactive chat responses, project roadmaps, and hardware debugging solutions.
+- The Express backend abstracts complex business logic and normalizes all database and AI interactions.
+- A comprehensive event-sourcing ledger (Activity model) tracks user progress across the platform.
 
-## Target Users
-1. **Students & Hobbyists:** Individuals looking to learn IoT concepts, build their first smart home device, or prepare for technical interviews.
-2. **Software Developers:** Web/Mobile engineers wanting to expand into hardware integration without getting bogged down by electrical engineering minutiae.
-3. **Hardware Engineers:** Electronics experts needing assistance with cloud connectivity, API design, or modern software stacks.
-4. **IoT Solutions Architects:** Professionals designing enterprise-scale deployments who need to rapidly prototype system architectures and validate component compatibility.
+## 4. Key Features
+- **AI Mentor chat** with real-time Server-Sent Events (SSE) streaming responses.
+- **AI Debugger pipeline** that analyzes stack traces, compiler errors, and sensor logs to identify root causes and suggest code fixes.
+- **Project Planner** generating complete IoT architectures (MCU, sensors, milestones) based on natural language prompts.
+- **Interview Coach** simulating technical IoT engineering interviews with strict evaluation scoring.
+- **Learning Path engine** generating personalized, modular curriculum based on user activity history.
+- **High-performance Dashboard** utilizing `Promise.all` parallel server actions for instantaneous data aggregation.
+- **Glassmorphic UI** featuring Framer Motion micro-animations and Lenis smooth scrolling.
+- **Secure session management** using HTTP-Only cookies via Better Auth, completely eliminating local-storage JWT risks.
 
-## Business Value
-- **Educational Impact:** Can be utilized by bootcamps, universities, or online courses as a primary learning companion.
-- **Productivity Multiplier:** Reduces the time spent on boilerplate code, component research, and frustrating hardware bugs, allowing engineers to focus on business logic.
-- **Scalable Architecture:** Built with enterprise-grade technologies (Next.js, Node.js, MongoDB, Gemini AI), ensuring the platform itself can handle significant user growth and complex data interactions.
+## 5. Tech Stack
+- **Frontend:** Next.js 14+ (App Router), React, TypeScript, Tailwind CSS, Framer Motion, Lenis (Smooth Scrolling), Recharts, Zustand.
+- **Backend:** Node.js, Express.js, TypeScript.
+- **Datastore:** MongoDB Atlas via Mongoose ODM.
+- **AI:** Google Generative AI SDK (Gemini 2.5 Flash).
+- **Auth:** Better Auth (native MongoDB adapter).
+- **State Management:** Zustand (for reactive client-side UI caching).
 
-## Real-World Use Cases
-- **Smart Agriculture Prototype:** A user inputs "I want to build a soil moisture monitor using ESP32". The AI Planner generates a project roadmap, hardware list, and initial Arduino C++ skeleton code.
-- **Industrial Maintenance:** An engineer pastes an erratic MQTT connection log into the AI Debugger. The system identifies a QoS mismatch and suggests the exact configuration change needed.
-- **Career Preparation:** A junior developer uses the Interview Coach to practice answering questions about IoT security protocols (e.g., TLS over MQTT, LoRaWAN security keys).
-- **Skill Tracking:** As a user completes AI-guided modules on Edge Computing, their Skill Radar on the Dashboard dynamically updates to reflect their new proficiency level.
+## 6. System Architecture
 
-## Architecture
+**High-Level System**
+The system is cleanly decoupled. The Next.js client handles all presentation, UI state, and user interactions. The Express backend handles all authorization constraints, Mongoose queries, and Google Gemini API interactions.
 
+**AI Processing Pipeline**
+Prompts are enriched with system context on the Express backend before being dispatched to Gemini. Responses are formatted either as strict JSON (for roadmaps and debugging) or streamed directly back through the Express pipeline to the client (for chat).
+
+**Authentication Layer**
+Better Auth natively manages the `user` and `session` collections directly in MongoDB, bypassing Mongoose to avoid schema collisions, ensuring a highly performant and secure identity lifecycle.
+
+## 7. Core Pipelines
+**Chat pipeline:**
+1. User message posted to `/api/ai/chat`.
+2. The Express controller injects a strict IoT System Prompt.
+3. Gemini processes the query and generates a response stream.
+4. Express pipes the chunks directly to the client via `Content-Type: text/event-stream`.
+5. The Next.js client natively renders the incoming stream to the UI.
+
+**Dashboard rendering pipeline:**
+1. Next.js component mounts and verifies the Zustand auth state.
+2. Parallel Server Actions (`getActivityStats`, `getActivities`, `getProjects`) are fired simultaneously.
+3. Server Fetch utilities attach the HTTP-only cookie and forward requests to Express.
+4. Mongoose executes optimized aggregations (e.g., matching by `user` and sorting by `createdAt: -1`).
+5. Client hydrates the Recharts and Framer Motion components instantly.
+
+**Debugging pipeline:**
+1. User pastes a hardware log into the UI.
+2. The payload is sent to `/api/ai/debug`.
+3. Gemini analyzes the stack trace and generates a structured JSON fix.
+4. The client renders the specific root cause and code correction.
+
+## 8. Project Structure
+```text
+client/
+  src/
+    app/            # Next.js App Router (Pages & Layouts)
+    features/       # Domain-specific UI (ai, dashboard, projects)
+    components/     # Reusable UI & Layout shells
+    lib/            # Server actions, API wrappers, Core fetchers
+    store/          # Zustand global state
+server/
+  src/
+    controllers/    # Request parsing & HTTP response formatting
+    routes/         # Express router definitions
+    services/       # Core business logic & AI interactions
+    models/         # Mongoose schemas
+    middlewares/    # Auth, Validation (Zod), Error Handling
+    config/         # Better Auth & DB initialization
+docs/               # Numbered Project Learning Path (01-11)
 ```
-iot-copilot/
-├── PLANNING/           # Architecture & planning documents
-├── server/             # Express.js + TypeScript backend
-│   ├── src/
-│   │   ├── config/     # DB, env, cloudinary config
-│   │   ├── models/     # Mongoose schemas (6 models)
-│   │   ├── routes/     # REST API routes (8 modules)
-│   │   ├── controllers/# Request handlers
-│   │   ├── middleware/  # Auth, admin, validation, rate limiting
-│   │   ├── services/   # Gemini AI, Cloudinary, Email, Memory
-│   │   └── types/      # TypeScript type definitions
-│   └── package.json
-├── client/             # Next.js 16 + React 19 frontend
-│   ├── src/
-│   │   ├── app/        # App router pages (15+ routes)
-│   │   ├── components/ # UI, Layout, Landing, Dashboard, AI, Projects
-│   │   ├── features/     # Feature-based modular code
-│   │   ├── lib/          # Core library (API, Actions, Fetch wrappers)
-│   │   ├── store/        # Zustand state management
-│   │   └── types/      # TypeScript interfaces
-│   └── package.json
-└── .gitignore
-```
 
-## Tech Stack
+## 9. How the System Works
+- User signs in with Better Auth credentials.
+- The `useAuthStore` fetches the session and redirects the user to the Dashboard.
+- The user accesses tools (AI Mentor, Debugger, Learning Paths, Projects).
+- Client wrappers securely forward requests with HTTP-Only cookies to the Express backend.
+- The backend validates access via middleware and invokes the corresponding service.
+- The service interacts with MongoDB or Gemini, processes the result, and returns it to the client.
+- The client UI updates reactively using Framer Motion for polished transitions.
 
-### Frontend
-- Next.js 16, React 19, TypeScript
-- Tailwind CSS v4, Framer Motion
-- TanStack React Query, Recharts
-- Zustand, React Hook Form, Zod
-- Lucide Icons, React Hot Toast
-
-### Backend
-- Node.js, Express.js, TypeScript
-- MongoDB, Mongoose
-- Better Auth (JWT + refresh tokens)
-- Google Gemini AI API
-- Cloudinary (image upload)
-- Nodemailer (emails)
-
-## Features
-
-1. **AI IoT Mentor** — Personalized IoT explanations with memory
-2. **AI Learning Path** — Dynamic roadmap generation
-3. **Component Recommender** — Smart hardware suggestions
-4. **Project Planner** — Complete IoT project architecture
-5. **AI Debugger** — Step-by-step diagnostic engineer
-6. **Interview Coach** — Real IoT interview practice with feedback
-7. **Progress Memory** — Context-aware AI responses
-8. **Recommendation Engine** — Smart next-topic suggestions
-
-## Quick Start
-
-### Prerequisites
-- Node.js 20+
-- MongoDB (local or Atlas)
-- Google Gemini API key
-- Cloudinary account (for images)
-
-### 1. Clone & Install
+## 10. Installation
 ```bash
-git clone <repo-url>
-cd iot-copilot
+git clone https://github.com/kamalcodezen/Iot-Copilot.git
+cd Iot-Copilot
 
-# Install server dependencies
-cd server && npm install
+# Install Backend
+cd server
+npm install
 
-# Install client dependencies
-cd ../client && npm install
+# Install Frontend
+cd ../client
+npm install
 ```
 
-### 2. Environment Variables
+## 11. Running the Project
 ```bash
-# server/.env
-cp server/.env.example server/.env
-# Fill in: MONGODB_URI, JWT_SECRET, GEMINI_API_KEY, etc.
+# Start Backend
+cd server
+npm run dev
 
-# client/.env.local
-cp client/.env.example client/.env.local
-# Fill in: NEXT_PUBLIC_API_URL
+# Start Frontend (in a new terminal)
+cd client
+npm run dev
 ```
 
-### 3. Run Development
+## 12. Environment Variables
+Required variables to run the current code paths:
+
+**Backend (`server/.env`)**
 ```bash
-# Terminal 1: Server
-cd server && npm run dev
-
-# Terminal 2: Client
-cd client && npm run dev
+PORT=5000
+NODE_ENV=development
+MONGODB_URI=
+BETTER_AUTH_SECRET=
+BETTER_AUTH_URL=http://localhost:5000
+CLIENT_URL=http://localhost:3000
+GEMINI_API_KEY=
 ```
 
-Visit http://localhost:3000
+**Frontend (`client/.env.local`)**
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:5000/api
+```
 
-## API Endpoints
+## 13. Performance Optimizations
+- **Parallel Data Fetching:** Dashboard components utilize `Promise.all` across Server Actions to prevent sequential request waterfalls.
+- **Streaming AI Responses:** The AI Mentor utilizes SSE to render text instantly, eliminating long-polling perceived latency.
+- **Client-Side Caching:** Zustand acts as a reactive cache for the user session, preventing redundant `/api/auth/get-session` calls on every render.
+- **Database Indexing:** Mongoose schemas employ strategic compound indexes (e.g., `{ user: 1, createdAt: -1 }` on Activities) to ensure rapid timeline rendering as user data grows.
+- **Smooth Rendering:** Lenis scroll hijacking combined with hardware-accelerated Framer Motion guarantees 60fps UX across all platforms.
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | /api/auth/register | Register user |
-| POST | /api/auth/login | Login user |
-| GET | /api/auth/me | Get current user |
-| POST | /api/ai/chat | AI Mentor (SSE streaming) |
-| POST | /api/ai/debug | AI Debugger (SSE streaming) |
-| POST | /api/ai/roadmap | Generate learning path |
-| POST | /api/ai/interview | Generate interview questions |
-| CRUD | /api/projects | Project management |
-| GET | /api/activities/stats | User dashboard stats |
-| GET | /api/community/projects | Public projects |
-| GET | /api/admin/stats | Admin analytics |
+## 14. Performance Benchmarking & Architecture Decisions
+IoT Copilot uses a decoupled Next.js + Express architecture to separate the presentation layer from heavy backend processing and AI streaming.
 
-## Database Models
+A major architectural shift involved moving from sequential client-side `fetch` calls to parallelized Server Actions. By shifting data aggregation to `Promise.all` on the server and utilizing native Express middleware for security, the Dashboard's "Time to Interactive" (TTI) was significantly reduced.
 
-- **User** — Auth, profile, stats, badges, preferences
-- **Project** — CRUD, components, progress, timeline
-- **AIMemory** — Conversation history, context, metadata
-- **LearningPath** — Modules, resources, progress tracking
-- **Activity** — User activity feed and analytics
-- **Comment** — Community project comments
+This architecture ensures that the backend can scale independently (e.g., for heavy AI processing or WebSockets) without bogging down the Next.js React tree, while maintaining strict separation of concerns via thin controllers and thick service layers.
+
+## 15. Rights and License
+Repository ownership: This repository belongs to kamalcodezen.
+License status: No top-level LICENSE file is currently present.
+Rights notice: Until a license is explicitly added, all rights are reserved by the repository owner.
+Third-party notice: External services, SDKs, logos, and trademarks used by this project remain under their respective licenses and terms.
