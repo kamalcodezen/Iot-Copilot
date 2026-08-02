@@ -154,6 +154,9 @@ function LoginForm() {
               Sign In <ArrowRight size={15} className="ml-1.5" />
             </Button>
 
+            {/* TODO: Re-enable Google OAuth after fixing the redirect_uri_mismatch */}
+            {/* Pending: Verify Better Auth callback URL and Google Cloud Console OAuth configuration. */}
+            {/* 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-border-default" />
@@ -173,6 +176,7 @@ function LoginForm() {
               <ChromeIcon size={15} className="mr-2" />
               Google
             </Button>
+            */}
           </form>
     </AuthShell>
   );
