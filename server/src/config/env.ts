@@ -35,8 +35,7 @@ export const env = {
   FRONTEND_URL: required('FRONTEND_URL'),
   BETTER_AUTH_URL: required('BETTER_AUTH_URL'),
 
-  GEMINI_API_KEY: optional('GEMINI_API_KEY', ''),
-  GEMINI_MODEL: optional('GEMINI_MODEL', 'gemini-3.5-flash'),
+  GROQ_API_KEY: required('GROQ_API_KEY'),
 
   CLOUDINARY_CLOUD_NAME: optional('CLOUDINARY_CLOUD_NAME', ''),
   CLOUDINARY_API_KEY: optional('CLOUDINARY_API_KEY', ''),

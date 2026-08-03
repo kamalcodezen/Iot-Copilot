@@ -1,8 +1,6 @@
-import { GoogleGenAI } from '@google/genai';
+import Groq from 'groq-sdk';
 import { env } from '../config/env';
 import { AppError, RateLimitError } from '../utils/errors';
-
-const PLACEHOLDER_KEY = 'YOUR_API_KEY';
 
 // --- Prompt builders ----------------------------------------------------------
 
@@ -230,96 +228,59 @@ Respond now (in the user's language):`;
 
 // --- Generation infrastructure ------------------------------------------------
 
-function getGenAI(): GoogleGenAI {
-  if (!env.GEMINI_API_KEY || env.GEMINI_API_KEY.trim() === '' || env.GEMINI_API_KEY === PLACEHOLDER_KEY) {
-    throw new Error('AI service is not configured. Please set a valid GEMINI_API_KEY in server .env');
+function getGroq(): Groq {
+  if (!env.GROQ_API_KEY || env.GROQ_API_KEY.trim() === '') {
+    throw new AppError(400, 'AI_CONFIG_ERROR', 'AI service is not configured. Please set a valid GROQ_API_KEY in server .env');
   }
-  return new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
+  return new Groq({ apiKey: env.GROQ_API_KEY });
 }
 
-const GEMINI_CONFIG = { maxOutputTokens: 4096 };
-
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const withRetry = async <T>(operation: () => Promise<T>, maxRetries = 3): Promise<T> => {
-  let lastError: unknown;
-  for (let i = 0; i < maxRetries; i++) {
-    try {
-      return await operation();
-    } catch (error) {
-      lastError = error;
-      const raw = error instanceof Error ? error.message : String(error);
-
-      // Rate-limit and quota errors (429, RESOURCE_EXHAUSTED) are never
-      // retried: a retry inside the same window cannot succeed and only
-      // burns another unit of the per-minute quota. Each retry is a
-      // duplicate generation request, so retrying quota errors exhausts
-      // the free-tier budget (5 req/min) several times faster and turns
-      // every subsequent AI call into a 429. Quota errors fail
-      // immediately and the friendly error is surfaced unchanged.
-      const isQuotaError = /429|RESOURCE_EXHAUSTED|quota|rate\s*limit/i.test(raw);
-      // Only transient failures are retried: upstream 5xx availability
-      // errors and network-level failures.
-      const isTransientError = /500|502|503|UNAVAILABLE|INTERNAL|ECONNRESET|ETIMEDOUT|EPIPE|ENOTFOUND|EAI_AGAIN|fetch\s+failed|socket\s+hang/i.test(raw);
-      if (!isQuotaError && isTransientError && i < maxRetries - 1) {
-        const delay = Math.pow(2, i) * 1500 + Math.random() * 1000;
-        console.warn(`[AI Service] Transient API error. Retrying in ${Math.round(delay)}ms... (Attempt ${i + 1}/${maxRetries})`);
-        await sleep(delay);
-        continue;
-      }
-
-      throw error;
-    }
-  }
-  throw lastError;
-};
-
-// Maps raw Gemini errors to typed AppErrors so controllers can distinguish
-// quota, config, and provider failures from generic ones.
-function handleGeminiError(error: unknown): never {
+function handleGroqError(error: unknown): never {
   const raw = error instanceof Error ? error.message : String(error);
-  console.error(`[AI Service] Gemini API error: ${raw.slice(0, 300)}`);
-  if (/429|RESOURCE_EXHAUSTED|quota|rate\s*limit/i.test(raw)) {
+  console.error(`[AI Service] Groq API error: ${raw.slice(0, 300)}`);
+  
+  if (/429|rate\s*limit|quota/i.test(raw)) {
     throw new RateLimitError('AI quota exceeded. Please try again later.');
   }
-  if (/API[_ ]?key|API_KEY_INVALID|400/i.test(raw)) {
-    throw new AppError(400, 'AI_CONFIG_ERROR', 'AI service is not configured. Please set a valid GEMINI_API_KEY in server .env');
+  if (/API[_ ]?key|401|403/i.test(raw)) {
+    throw new AppError(400, 'AI_CONFIG_ERROR', 'AI service is not configured correctly. Please check GROQ_API_KEY.');
   }
-  if (/503|UNAVAILABLE|INTERNAL/i.test(raw)) {
+  if (/503|500|502|UNAVAILABLE|INTERNAL/i.test(raw)) {
     throw new AppError(503, 'AI_PROVIDER_ERROR', 'AI provider error. Please try again.');
   }
   throw new AppError(500, 'AI_SERVICE_ERROR', 'AI service error. Please try again.');
 }
 
-// --- Public generation API ----------------------------------------------------
-
 export const generateContent = async (prompt: string): Promise<string> => {
   try {
-    const response = await withRetry(() => getGenAI().models.generateContent({
-      model: env.GEMINI_MODEL,
-      contents: prompt,
-      config: GEMINI_CONFIG,
-    }));
-    return response.text || '';
+    const response = await getGroq().chat.completions.create({
+      messages: [{ role: 'user', content: prompt }],
+      model: 'llama-3.3-70b-versatile',
+      temperature: 0.7,
+      max_tokens: 4096,
+    });
+    return response.choices?.[0]?.message?.content || '';
   } catch (error) {
-    // handleGeminiError never returns (it always throws a typed AppError),
-    // so the catch block needs no return value.
-    handleGeminiError(error);
+    handleGroqError(error);
   }
 };
 
 export const generateContentStream = async function* (prompt: string) {
   try {
-    const stream = await withRetry(() => getGenAI().models.generateContentStream({
-      model: env.GEMINI_MODEL,
-      contents: prompt,
-      config: GEMINI_CONFIG,
-    }));
+    const stream = await getGroq().chat.completions.create({
+      messages: [{ role: 'user', content: prompt }],
+      model: 'llama-3.3-70b-versatile',
+      temperature: 0.7,
+      max_tokens: 4096,
+      stream: true,
+    });
     for await (const chunk of stream) {
-      if (chunk.text) yield chunk.text;
+      const content = chunk.choices[0]?.delta?.content;
+      if (content) {
+        yield content;
+      }
     }
   } catch (error) {
-    // See generateContent: handleGeminiError always throws, never returns.
-    handleGeminiError(error);
+    handleGroqError(error);
   }
 };
