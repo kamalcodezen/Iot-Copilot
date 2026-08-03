@@ -46,13 +46,12 @@ function createAuth() {
     plugins: [admin()],
     advanced: {
       defaultCookieAttributes: {
-        sameSite: 'lax',
+        sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
         secure: env.NODE_ENV === 'production',
         httpOnly: true,
       },
       crossSubDomainCookies: {
-        enabled: true,
-        domain: 'localhost',
+        enabled: env.NODE_ENV !== 'production',
       },
     },
     user: {

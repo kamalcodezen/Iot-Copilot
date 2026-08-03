@@ -71,7 +71,7 @@ function LoginForm() {
       setApiError('');
       const user = await login(data.email, data.password);
       toast.success('Welcome back!');
-      router.push(user.role === 'admin' ? '/admin' : (searchParams.get('redirect') || '/dashboard'));
+      router.push(user.role === 'admin' ? '/admin' : (searchParams.get('redirect') || '/'));
     } catch (error) {
       const message = getLoginErrorMessage(error);
       setApiError(message);

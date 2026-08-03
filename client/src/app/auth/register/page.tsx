@@ -58,7 +58,7 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.replace('/dashboard');
+      router.replace('/');
     }
   }, [isLoading, isAuthenticated, router]);
 
@@ -91,7 +91,7 @@ export default function RegisterPage() {
       setApiError('');
       const user = await registerUser(data.name, data.email, data.password);
       toast.success('Account created! Welcome to IoT Copilot.');
-      router.push(user.role === 'admin' ? '/admin' : '/dashboard');
+      router.push(user.role === 'admin' ? '/admin' : '/');
     } catch (error) {
       const message = getRegisterErrorMessage(error);
       setApiError(message);

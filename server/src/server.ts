@@ -16,7 +16,8 @@ async function start() {
     await new Promise<void>((resolve, reject) => {
       server = app.listen(env.PORT);
       server.on('listening', () => {
-        logger.info(`Server running on http://localhost:${env.PORT}`);
+        const url = env.NODE_ENV === 'production' ? (env.BETTER_AUTH_URL || `Port ${env.PORT}`) : `http://localhost:${env.PORT}`;
+        logger.info(`Server running on ${url}`);
         resolve();
       });
       server.on('error', (err: Error) => {
