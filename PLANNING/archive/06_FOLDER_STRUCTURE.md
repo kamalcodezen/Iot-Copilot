@@ -52,7 +52,7 @@ iot-copilot/
 │   │   │   ├── rateLimit.ts
 │   │   │   └── errorHandler.ts
 │   │   ├── services/
-│   │   │   ├── gemini.ts
+│   │   │   ├── Groq.ts
 │   │   │   ├── cloudinary.ts
 │   │   │   ├── email.ts
 │   │   │   └── memory.ts

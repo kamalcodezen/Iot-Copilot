@@ -37,8 +37,8 @@ This document details the complete end-to-end user and technical flow for intera
   2. `ChatContainer` adds the user's message to the local UI state and sets `isStreaming = true`.
   3. `ai-stream.ts` sends a POST request to `/api/ai/chat` via fetch.
   4. The Express server (`aiController.ts`) validates the request and passes it to `aiService.ts`.
-  5. `aiService.ts` wraps the user prompt with system instructions ("You are a Senior IoT Engineer...") and calls the Gemini SDK.
-  6. Gemini returns a stream. The Express server pipes this stream back to the client.
+  5. `aiService.ts` wraps the user prompt with system instructions ("You are a Senior IoT Engineer...") and calls the Groq SDK.
+  6. Groq returns a stream. The Express server pipes this stream back to the client.
   7. The client decodes the stream chunk-by-chunk, appending it to the AI's message bubble in real-time.
 
 ## 5. Project Planning
@@ -46,7 +46,7 @@ This document details the complete end-to-end user and technical flow for intera
 - **Flow:**
   1. User fills out a form specifying their desired IoT project (e.g., "Smart Garden").
   2. Client sends POST to `/api/ai/plan`.
-  3. The server prompts Gemini to generate a JSON response matching the `Project` schema.
+  3. The server prompts Groq to generate a JSON response matching the `Project` schema.
   4. Once generated, the server saves the new `Project` document in MongoDB and returns the ID.
   5. Client redirects the user to `/projects/[id]`.
   6. User views their generated milestones, hardware list, and architectural recommendations.

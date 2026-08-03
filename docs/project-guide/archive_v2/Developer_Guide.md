@@ -70,7 +70,7 @@ Welcome to the IoT Copilot engineering team. This guide outlines how to set up y
    cd server
    npm install
    cp .env.example .env
-   # Fill out MONGODB_URI, BETTER_AUTH_SECRET, GEMINI_API_KEY
+   # Fill out MONGODB_URI, BETTER_AUTH_SECRET, GROQ_API_KEY
    npm run dev
    ```
 
@@ -106,7 +106,7 @@ Welcome to the IoT Copilot engineering team. This guide outlines how to set up y
 
 ### Backend Debugging
 - **Better Auth:** If authentication fails, check the server console. Better Auth logs errors verbosely in development mode.
-- **Gemini API:** If the AI features stop working, check if a `429 Quota Exceeded` error is being returned from Google. Ensure your `.env` contains a valid, funded API key.
+- **Groq API:** If the AI features stop working, check if a `429 Quota Exceeded` error is being returned from Google. Ensure your `.env` contains a valid, funded API key.
 
 
 <!-- Content from 22_Architecture_Refactor_Report_Part_3.md -->
@@ -127,11 +127,11 @@ Welcome to the IoT Copilot engineering team. This guide outlines how to set up y
 - **Backend Flow**:
   1. The Express route `POST /ai/message` or `GET /ai/stream` receives the prompt.
   2. The prompt is augmented with context (user's past projects, IoT domain specific instructions).
-  3. Sent to the **Gemini API** for completion.
+  3. Sent to the **Groq API** for completion.
   4. Response is streamed back to the client.
 - **Database Interaction**:
   - The conversation is saved in the `AIMemory` collection.
-  - Previous messages are fetched from `AIMemory` to provide conversation history to the Gemini API.
+  - Previous messages are fetched from `AIMemory` to provide conversation history to the Groq API.
 
 ---
 
@@ -191,7 +191,7 @@ Here are the primary backend endpoints consumed by the client's `lib/` layer:
 2. **Registration**: You click "Sign Up" and are taken to `/auth/register`. You enter your details. The backend creates your account and issues a session cookie.
 3. **Dashboard**: You are redirected to `/dashboard`. Here you see an overview of your non-existent projects and recommended learning paths.
 4. **Learning**: You click on "Learning" in the nav. You browse paths and click "Enroll" on "Intro to Arduino".
-5. **AI Copilot**: While learning, you get stuck. You click the floating AI button, type "How do I wire a resistor to an LED?", and the AI streams back a detailed answer using Gemini.
+5. **AI Copilot**: While learning, you get stuck. You click the floating AI button, type "How do I wire a resistor to an LED?", and the AI streams back a detailed answer using Groq.
 6. **Community**: You want to share your progress, so you go to `/community`, click "New Post", and say hello.
 7. **Projects**: You finish your first LED project. You go to `/projects/new`, upload your code snippet, hardware list, and a photo, and publish it.
 8. **Profile**: You visit your profile `/profile` to admire your new project and update your avatar.
@@ -304,7 +304,7 @@ During the documentation process, the following areas were identified as potenti
    - Any hardcoded JWT token generation utilities in the backend.
 
 2. **Security Improvements:**
-   - **Rate Limiting:** Implement a strict Express rate limiter (`express-rate-limit`) on all `/api/ai/*` routes to prevent abuse of the Gemini API key.
+   - **Rate Limiting:** Implement a strict Express rate limiter (`express-rate-limit`) on all `/api/ai/*` routes to prevent abuse of the Groq API key.
    - **Environment Variables:** Rotate `BETTER_AUTH_SECRET` before pushing to a production environment.
 
 3. **Performance Improvements:**

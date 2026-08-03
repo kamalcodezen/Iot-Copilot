@@ -87,7 +87,7 @@ This document explores the typical pathways different user archetypes take throu
 2. **AI Recommendation:** Notices an AI Suggestion to try the "Learning Path".
 3. **Learning Module:** Navigates to `/learning-path` and completes a module on Basic Sensors.
 4. **Project Creation:** Navigates to `/projects/new` and uses the AI Planner to generate a "Smart Weather Station" project.
-5. **Execution & Mentorship:** While building, the student gets stuck writing I2C code for a sensor. They open `/ai-mentor`, paste their code, and ask for help. The Gemini AI provides the corrected C++ code.
+5. **Execution & Mentorship:** While building, the student gets stuck writing I2C code for a sensor. They open `/ai-mentor`, paste their code, and ask for help. The Groq AI provides the corrected C++ code.
 6. **Completion:** The student marks milestones as completed in the Project timeline, which updates their global stats (Streak, Total Projects) on the dashboard.
 
 ## 3. The Professional Engineer Journey
@@ -104,7 +104,7 @@ This document explores the typical pathways different user archetypes take throu
 **Goal:** Monitor platform health and manage user quotas.
 
 1. **Overview:** Logs into a dedicated `/admin` route (Currently static/mocked in Next.js structure).
-2. **Monitoring:** Views total active users, database size, and Gemini AI API quota consumption.
+2. **Monitoring:** Views total active users, database size, and Groq AI API quota consumption.
 3. **Management:** Can view user reports, reset accounts, or manage global system broadcasts.
 
 ---

@@ -20,7 +20,7 @@
 - [ ] Middleware: auth, admin, validation, error handler
 
 ## Phase 3: AI Integration (Day 5-7)
-- [ ] Gemini API service
+- [ ] Groq API service
 - [ ] AI Chat endpoint (streaming SSE)
 - [ ] AI Debug endpoint
 - [ ] AI Interview endpoint

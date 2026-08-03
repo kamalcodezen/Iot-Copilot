@@ -4,7 +4,7 @@
 
 # AI Module Documentation
 
-The AI capabilities are powered by the **Google Gemini API**.
+The AI capabilities are powered by the **Google Groq API**.
 
 ## Core Features
 - **AI Mentor:** Chat interface answering queries about IoT development, electronics, and coding.
@@ -14,10 +14,10 @@ The AI capabilities are powered by the **Google Gemini API**.
 1. Frontend captures user input.
 2. The request is enriched with contextual data (e.g., current project stack).
 3. The Backend Service formats the system instructions and user prompt.
-4. Sent to Gemini API.
+4. Sent to Groq API.
 
 ## Streaming
-For a fast UX, the backend streams the Gemini response back to the client using Server-Sent Events (SSE) or chunked transfer encoding, allowing real-time text rendering.
+For a fast UX, the backend streams the Groq response back to the client using Server-Sent Events (SSE) or chunked transfer encoding, allowing real-time text rendering.
 
 ## Error Handling
 - Rate limits or API outages are caught in the backend.
@@ -34,11 +34,11 @@ For a fast UX, the backend streams the Gemini response back to the client using 
 
 # 07. AI System
 
-IoT Copilot's intelligence is powered by the Google Generative AI SDK, specifically utilizing the `gemini-2.5-flash` model for high-speed, cost-effective reasoning.
+IoT Copilot's intelligence is powered by the Groq SDK, specifically utilizing the `llama-3.3-70b-versatile` model for high-speed, cost-effective reasoning.
 
 ## 1. Core Service Integration (`server/src/services/ai.ts`)
 The entire AI implementation is abstracted into a single service file to prevent business logic from leaking into controllers.
-- **Model Selection:** `gemini-2.5-flash` is hardcoded as the default model due to its generous free tier and fast inference time, making it ideal for streaming chat responses.
+- **Model Selection:** `llama-3.3-70b-versatile` is hardcoded as the default model due to its generous free tier and fast inference time, making it ideal for streaming chat responses.
 - **Error Handling (429 Quota Exceeded):** The service implements a `withRetry` wrapper that intercepts rate-limit errors. If a `429` is thrown, the system delays exponentially and retries. If the ultimate failure is reached, it throws a parsed, user-friendly error rather than a raw API trace.
 - **System Instructions:** Every AI method injects a "System Prompt" (e.g., "You are an expert IoT Engineer...") before appending the user's prompt.
 
@@ -46,7 +46,7 @@ The entire AI implementation is abstracted into a single service file to prevent
 - **Purpose:** Acts as a pair-programming partner for hardware and software.
 - **Flow:**
   - Client sends an array of messages (`{ role: 'user', content: '...' }`).
-  - Server formats this into a Gemini `Content` array.
+  - Server formats this into a Groq `Content` array.
   - Server calls `model.generateContentStream()`.
   - The Express response object streams the raw text chunks back to the client.
 - **Client Handling:** `lib/api/ai-stream.ts` uses the native `ReadableStream` to append chunks to the UI state instantly.
@@ -55,13 +55,13 @@ The entire AI implementation is abstracted into a single service file to prevent
 - **Purpose:** Analyzes stack traces, compiler errors (e.g., Arduino IDE), or sensor logs.
 - **Flow:**
   - User pastes a log and optionally a code snippet.
-  - Server prompts Gemini to identify the root cause and provide a specific code fix.
+  - Server prompts Groq to identify the root cause and provide a specific code fix.
   - Returns a structured JSON response (not streamed) since the user needs to see the final, formatted diagnosis.
 
 ## 4. AI Project Planner
 - **Purpose:** Generates a complete project architecture based on a simple user prompt (e.g., "Smart Garden").
 - **Flow:**
-  - Prompts Gemini to return a JSON object containing `title`, `description`, `architecture` (MCU, sensors), and `milestones`.
+  - Prompts Groq to return a JSON object containing `title`, `description`, `architecture` (MCU, sensors), and `milestones`.
   - The server parses the JSON and directly inserts it into the MongoDB `Project` collection.
 
 ## 5. AI Interview Coach

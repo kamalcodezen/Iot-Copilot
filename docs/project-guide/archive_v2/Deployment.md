@@ -20,7 +20,7 @@
 - [ ] Database credentials are secure.
 - [ ] CORS is configured strictly to the frontend domain.
 - [ ] Better Auth secret is generated and set.
-- [ ] Gemini API key is valid.
+- [ ] Groq API key is valid.
 
 ---
 ### Document Meta
@@ -53,7 +53,7 @@ BETTER_AUTH_SECRET=your_super_secret_generated_string
 BETTER_AUTH_URL=https://api.yourdomain.com
 
 # AI Integration
-GEMINI_API_KEY=your_google_ai_studio_api_key
+GROQ_API_KEY=your_google_ai_studio_api_key
 
 # CORS
 CLIENT_URL=https://yourdomain.com
@@ -96,4 +96,4 @@ The backend is a Node.js Express server compiled from TypeScript.
 ## 5. Security Checklist Before Production
 - Ensure `BETTER_AUTH_SECRET` is a strong, cryptographically secure string (e.g., generated via `openssl rand -base64 32`).
 - Verify `CORS` is strictly limited to your `CLIENT_URL` in `server/src/app.ts`.
-- Ensure Gemini API quotas are monitored, as high traffic to the AI features can exhaust free tier limits.
+- Ensure Groq API quotas are monitored, as high traffic to the AI features can exhaust free tier limits.

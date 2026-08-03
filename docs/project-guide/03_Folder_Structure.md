@@ -52,7 +52,7 @@ Iot-copilot/
 - **`controllers/`**: Extracts data from HTTP requests (`req.body`, `req.query`), invokes the relevant Service, and formats the HTTP response (`res.json()`).
 - **`routes/`**: Connects HTTP methods and paths to Controllers. Attaches middlewares.
 - **`middlewares/`**: Request interceptors. Includes `auth` (Better Auth integration), `validate` (Zod schema checking), and `errorHandler`.
-- **`services/`**: The core business logic layer. Performs DB operations via Models and interacts with external APIs (like Gemini).
+- **`services/`**: The core business logic layer. Performs DB operations via Models and interacts with external APIs (like Groq).
 - **`models/`**: Mongoose schemas defining the MongoDB collections.
 - **`validators/`**: Zod schemas used by the validation middleware to sanitize incoming data.
 - **`config/`**: Setup logic for the application (e.g., MongoDB connection, Better Auth config).

@@ -71,7 +71,7 @@ The backend follows a classic Express.js MVC (Model-View-Controller) pattern, ad
 
 ### `server/src/services`
 - **Purpose:** Complex business logic and third-party API interactions.
-- **Contents:** `ai.ts` (Google Gemini SDK implementation, prompt formatting, stream generation).
+- **Contents:** `ai.ts` (Google Groq SDK implementation, prompt formatting, stream generation).
 - **Interactions:** Called by `controllers/` to keep controllers thin and testable.
 
 ### `server/src/middlewares`

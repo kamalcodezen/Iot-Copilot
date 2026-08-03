@@ -41,7 +41,7 @@ During the documentation process, the following areas were identified as potenti
    - Any hardcoded JWT token generation utilities in the backend.
 
 2. **Security Improvements:**
-   - **Rate Limiting:** Implement a strict Express rate limiter (`express-rate-limit`) on all `/api/ai/*` routes to prevent abuse of the Gemini API key.
+   - **Rate Limiting:** Implement a strict Express rate limiter (`express-rate-limit`) on all `/api/ai/*` routes to prevent abuse of the Groq API key.
    - **Environment Variables:** Rotate `BETTER_AUTH_SECRET` before pushing to a production environment.
 
 3. **Performance Improvements:**

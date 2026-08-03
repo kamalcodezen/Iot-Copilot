@@ -23,7 +23,7 @@ This guide details the purpose and execution context of the most critical files 
 - **When it executes:** Upon import (singleton instance).
 
 ### `client/src/lib/api/ai-stream.ts`
-- **Purpose:** Utility for reading Server-Sent Events (SSE) from the Gemini AI backend.
+- **Purpose:** Utility for reading Server-Sent Events (SSE) from the Groq AI backend.
 - **Responsibility:** Exposes `streamAIResponse()` which uses the browser's native `fetch` and `ReadableStream` API to parse text chunks in real time. Contains robust error parsing logic for rate limits.
 - **Who imports it:** `ChatContainer.tsx`.
 - **When it executes:** Whenever a user submits a prompt to the AI Mentor.
@@ -47,7 +47,7 @@ This guide details the purpose and execution context of the most critical files 
 - **Who imports it:** `server.ts`.
 
 ### `server/src/services/ai.ts`
-- **Purpose:** Google Generative AI SDK abstraction layer.
+- **Purpose:** Groq SDK abstraction layer.
 - **Responsibility:** Manages the `GoogleGenerativeAI` instance, implements robust `withRetry` logic for handling 429 Rate Limit errors, and exports highly specific functions like `chat()`, `generateRoadmap()`, and `debugCode()`.
 - **Who imports it:** `aiController.ts`.
 - **When it executes:** When any AI-related endpoint is hit.
@@ -61,5 +61,5 @@ This guide details the purpose and execution context of the most critical files 
 
 ### `server/.env`
 - **Purpose:** Secrets storage.
-- **Responsibility:** Holds `MONGODB_URI`, `BETTER_AUTH_SECRET`, `GEMINI_API_KEY`.
+- **Responsibility:** Holds `MONGODB_URI`, `BETTER_AUTH_SECRET`, `GROQ_API_KEY`.
 - **Who uses it:** `process.env` accessed throughout the backend.

@@ -46,5 +46,5 @@ Let's trace the flow of a user requesting their Dashboard data.
 ### Special Case: Server-Sent Events (AI Streaming)
 If the flow involves the AI Mentor:
 - The client uses standard Fetch API but reads the response body via a reader (`response.body.getReader()`).
-- The server (`aiController.ts`) sets headers `Content-Type: text/event-stream` and pipes chunks directly from the Google Generative AI SDK to `res.write()`.
-- This creates an open pipeline where data flows continuously from Gemini -> Server -> Client without waiting for the full response to complete.
+- The server (`aiController.ts`) sets headers `Content-Type: text/event-stream` and pipes chunks directly from the Groq SDK to `res.write()`.
+- This creates an open pipeline where data flows continuously from Groq -> Server -> Client without waiting for the full response to complete.

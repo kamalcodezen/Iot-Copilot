@@ -43,7 +43,7 @@ The complexity of IoT ecosystems (involving sensors, microcontrollers, edge gate
 ### Business Value
 - **Educational Impact:** Can be utilized by bootcamps, universities, or online courses as a primary learning companion.
 - **Productivity Multiplier:** Reduces the time spent on boilerplate code, component research, and frustrating hardware bugs, allowing engineers to focus on business logic.
-- **Scalable Architecture:** Built with enterprise-grade technologies (Next.js, Node.js, MongoDB, Gemini AI), ensuring the platform itself can handle significant user growth and complex data interactions.
+- **Scalable Architecture:** Built with enterprise-grade technologies (Next.js, Node.js, MongoDB, Groq AI), ensuring the platform itself can handle significant user growth and complex data interactions.
 
 ### Real-World Use Cases
 - **Smart Agriculture Prototype:** A user inputs "I want to build a soil moisture monitor using ESP32". The AI Planner generates a project roadmap, hardware list, and initial Arduino C++ skeleton code.

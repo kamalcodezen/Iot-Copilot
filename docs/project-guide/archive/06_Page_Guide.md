@@ -41,7 +41,7 @@ This guide maps out the Next.js App Router structure in `client/src/app`.
 ### `app/projects/new/page.tsx`
 - **Route:** `/projects/new`
 - **Purpose:** Allows creation of new projects.
-- **Business Logic:** Offers two paths: Manual Form (creates empty project) or AI Generator (prompts Gemini to architect a project).
+- **Business Logic:** Offers two paths: Manual Form (creates empty project) or AI Generator (prompts Groq to architect a project).
 
 ### `app/projects/[id]/page.tsx`
 - **Route:** `/projects/:id`
@@ -61,7 +61,7 @@ This guide maps out the Next.js App Router structure in `client/src/app`.
 
 ### `app/ai-mentor/page.tsx`
 - **Route:** `/ai-mentor`
-- **Purpose:** Conversational interface with the Gemini-powered Mentor.
+- **Purpose:** Conversational interface with the Groq-powered Mentor.
 - **API Calls:** POST to `/api/ai/chat` (streaming).
 
 ### `app/ai-debugger/page.tsx`

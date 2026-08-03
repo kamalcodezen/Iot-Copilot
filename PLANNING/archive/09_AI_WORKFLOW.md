@@ -2,7 +2,7 @@
 
 ## Architecture
 ```
-User Request → Express API → Gemini Service → Context Builder → Gemini API → Response Parser → User
+User Request → Express API → Groq Service → Context Builder → Groq API → Response Parser → User
                                                   ↑
                                             MongoDB (Memory)
 ```
@@ -59,7 +59,7 @@ const systemPrompt = buildSystemPrompt(user.skillLevel, context);
 
 ## Streaming Implementation
 ```typescript
-// Server-Sent Events (SSE) from Gemini
+// Server-Sent Events (SSE) from Groq
 const response = await model.generateContentStream({
   contents: [{ role: 'user', parts: [{ text: prompt }] }],
 });

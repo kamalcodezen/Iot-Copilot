@@ -98,7 +98,7 @@ Better Auth handles these endpoints natively. Mongoose controllers do not touch 
 #### `POST /api/ai/chat`
 - **Description:** Streams a response from the AI Mentor.
 - **Request Body:** `{ "messages": [{ "role": "user", "content": "How do I wire an I2C OLED?" }] }`
-- **Response:** Text/Event-Stream (SSE) containing raw text chunks from Gemini.
+- **Response:** Text/Event-Stream (SSE) containing raw text chunks from Groq.
 - **Errors:** `429 Too Many Requests` (Quota Exceeded).
 
 #### `POST /api/ai/debug`

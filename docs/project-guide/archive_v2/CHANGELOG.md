@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Complete architecture documentation.
 - Extracted all direct `fetch` calls into `lib/api`.
 - Established strict MVC-like layers in the Express backend.
-- Integrated Gemini AI module.
+- Integrated Groq AI module.
 
 ---
 ### Document Meta

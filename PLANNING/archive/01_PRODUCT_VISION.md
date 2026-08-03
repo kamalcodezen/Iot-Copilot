@@ -9,7 +9,7 @@ Be the definitive AI-powered platform that transforms how beginners and intermed
 - **Platform** — Not just a tool; a complete learning ecosystem
 
 ## Brand Pillars
-1. **Intelligence** — Powered by Gemini AI that understands IoT deeply
+1. **Intelligence** — Powered by Groq AI that understands IoT deeply
 2. **Guidance** — Step-by-step mentorship from zero to job-ready
 3. **Memory** — Remembers every interaction, every project, every struggle
 4. **Community** — Learn alone but grow together with peers

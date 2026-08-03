@@ -14,12 +14,12 @@ This document catalogs every major feature in IoT Copilot, detailing how it work
 
 ## 3. AI Project Planner
 - **Purpose:** Automatically generates an IoT architecture based on a user's textual prompt.
-- **How it works:** The prompt is sent to the Gemini AI, which is instructed to return a strict JSON schema representing the hardware list, milestones, and MCU choice. The backend parses this JSON and saves it to MongoDB.
+- **How it works:** The prompt is sent to the Groq AI, which is instructed to return a strict JSON schema representing the hardware list, milestones, and MCU choice. The backend parses this JSON and saves it to MongoDB.
 - **Files:** `client/src/features/projects/components/ProjectForm.tsx`, `server/src/services/ai.ts`, `server/src/models/Project.ts`.
 
 ## 4. AI Mentor Chat
 - **Purpose:** A conversational AI specifically tuned for embedded engineering.
-- **How it works:** Uses Server-Sent Events (SSE) to stream chunks of text from the Gemini API back to the React client in real time.
+- **How it works:** Uses Server-Sent Events (SSE) to stream chunks of text from the Groq API back to the React client in real time.
 - **Files:** `client/src/features/ai/components/ChatContainer.tsx`, `client/src/lib/api/ai-stream.ts`.
 
 ## 5. AI Debugger

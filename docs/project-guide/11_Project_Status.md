@@ -22,7 +22,7 @@ All notable changes to this project will be documented in this file. The format 
 - Complete architecture documentation.
 - Extracted all direct `fetch` calls into `lib/api`.
 - Established strict MVC-like layers in the Express backend.
-- Integrated Gemini AI module.
+- Integrated Groq AI module.
 
 ## Related Source Code
 - `N/A`

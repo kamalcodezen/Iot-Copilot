@@ -33,7 +33,7 @@ Welcome to the IoT Copilot engineering team.
    cd server
    npm install
    cp .env.example .env
-   # Fill out MONGODB_URI, BETTER_AUTH_SECRET, GEMINI_API_KEY
+   # Fill out MONGODB_URI, BETTER_AUTH_SECRET, GROQ_API_KEY
    npm run dev
    ```
 
@@ -74,7 +74,7 @@ Welcome to the IoT Copilot engineering team.
 
 #### Backend Debugging
 - **Better Auth:** If authentication fails, check the server console. Better Auth logs errors verbosely in development mode.
-- **Gemini API:** If the AI features stop working, check if a `429 Quota Exceeded` error is being returned from Google. Ensure your `.env` contains a valid, funded API key.
+- **Groq API:** If the AI features stop working, check if a `429 Quota Exceeded` error is being returned from Google. Ensure your `.env` contains a valid, funded API key.
 - **Node Debugger:** Attach a Node debugger to port `9229`.
 
 ### 4. Creating New Features
@@ -102,7 +102,7 @@ During the documentation process, the following areas were identified as potenti
 1. **Unused Code / Dead Code:**
    - Any hardcoded JWT token generation utilities in the backend.
 2. **Security Improvements:**
-   - **Rate Limiting:** Implement a strict Express rate limiter (`express-rate-limit`) on all `/api/ai/*` routes to prevent abuse of the Gemini API key.
+   - **Rate Limiting:** Implement a strict Express rate limiter (`express-rate-limit`) on all `/api/ai/*` routes to prevent abuse of the Groq API key.
    - **Environment Variables:** Rotate `BETTER_AUTH_SECRET` before pushing to a production environment.
 3. **Performance Improvements:**
    - **Database Indexes:** Ensure compound indexes on the `Activity` collection are utilized effectively, as this collection will grow exponentially compared to others.

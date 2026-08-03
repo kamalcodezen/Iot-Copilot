@@ -8,14 +8,14 @@ IoT Copilot is an intelligent, AI-driven platform designed to assist developers 
 - **Backend:** Node.js, Express, TypeScript
 - **Database:** MongoDB, Mongoose
 - **Authentication:** Better Auth
-- **AI:** Google Gemini API
+- **AI:** Google Groq API
 
 ## Architecture Overview
-The application follows a standard Client-Server architecture. The Next.js frontend communicates with the Express backend via REST APIs. The backend interacts with MongoDB for data persistence and the Gemini API for AI features. See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed flows.
+The application follows a standard Client-Server architecture. The Next.js frontend communicates with the Express backend via REST APIs. The backend interacts with MongoDB for data persistence and the Groq API for AI features. See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed flows.
 
 ## Quick Start
 1. **Clone the repository.**
-2. **Setup Environment:** Copy `.env.example` to `.env` in both `client/` and `server/` directories. Configure variables (e.g., `MONGO_URI`, `GEMINI_API_KEY`).
+2. **Setup Environment:** Copy `.env.example` to `.env` in both `client/` and `server/` directories. Configure variables (e.g., `MONGO_URI`, `GROQ_API_KEY`).
 3. **Install Dependencies:** Run `npm install` in both `client/` and `server/`.
 4. **Run Locally:** Run `npm run dev` in both directories.
 
@@ -78,7 +78,7 @@ The complexity of IoT ecosystems (involving sensors, microcontrollers, edge gate
 ## 5. Business Value
 - **Educational Impact:** Can be utilized by bootcamps, universities, or online courses as a primary learning companion.
 - **Productivity Multiplier:** Reduces the time spent on boilerplate code, component research, and frustrating hardware bugs, allowing engineers to focus on business logic.
-- **Scalable Architecture:** Built with enterprise-grade technologies (Next.js, Node.js, MongoDB, Gemini AI), ensuring the platform itself can handle significant user growth and complex data interactions.
+- **Scalable Architecture:** Built with enterprise-grade technologies (Next.js, Node.js, MongoDB, Groq AI), ensuring the platform itself can handle significant user growth and complex data interactions.
 
 ## 6. Real-World Use Cases
 - **Smart Agriculture Prototype:** A user inputs "I want to build a soil moisture monitor using ESP32". The AI Planner generates a project roadmap, hardware list, and initial Arduino C++ skeleton code.

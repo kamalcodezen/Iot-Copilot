@@ -4,7 +4,7 @@
 
 ## Future Capabilities
 - **User Management:** View all registered users, revoke sessions, or reset passwords manually.
-- **Quota Management:** Monitor global Gemini API usage to prevent unexpected billing spikes.
+- **Quota Management:** Monitor global Groq API usage to prevent unexpected billing spikes.
 - **Content Moderation:** Review community comments on public projects.
 
 ## How to Access (Once Implemented)
