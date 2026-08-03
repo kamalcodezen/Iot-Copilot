@@ -130,7 +130,7 @@ export default function AIAssistant() {
                         <div className="flex flex-col gap-2">
                           <p className="text-text-tertiary">
                             {m.error && /quota|credit|limit/i.test(m.error)
-                              ? "The AI service quota is currently exhausted (daily Gemini API limit). Please try again later."
+                              ? "The AI service quota is currently exhausted (daily Groq API limit). Please try again later."
                               : `I couldn't finish my reply${m.error ? `: ${m.error}` : '. Please try again'}.`}
                           </p>
                           <button

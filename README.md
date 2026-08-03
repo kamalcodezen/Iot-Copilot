@@ -14,7 +14,7 @@ IoT Copilot targets students, software engineers, and hardware architects by pro
 - **Education** (Personalized learning paths, mock interviews, and an interactive AI Mentor)
 
 ## 3. Solution
-IoT Copilot combines a highly interactive frontend with a robust, scalable Express backend backed by MongoDB, Better Auth, and Google Gemini AI services.
+IoT Copilot combines a highly interactive frontend with a robust, scalable Express backend backed by MongoDB, Better Auth, and Groq AI services.
 
 At a high level:
 - Users authenticate securely via Better Auth.
@@ -37,17 +37,17 @@ At a high level:
 - **Frontend:** Next.js 14+ (App Router), React, TypeScript, Tailwind CSS, Framer Motion, Lenis (Smooth Scrolling), Recharts, Zustand.
 - **Backend:** Node.js, Express.js, TypeScript.
 - **Datastore:** MongoDB Atlas via Mongoose ODM.
-- **AI:** Google Generative AI SDK (Gemini 2.5 Flash).
+- **AI:** Groq SDK (Llama 3.3).
 - **Auth:** Better Auth (native MongoDB adapter).
 - **State Management:** Zustand (for reactive client-side UI caching).
 
 ## 6. System Architecture
 
 **High-Level System**
-The system is cleanly decoupled. The Next.js client handles all presentation, UI state, and user interactions. The Express backend handles all authorization constraints, Mongoose queries, and Google Gemini API interactions.
+The system is cleanly decoupled. The Next.js client handles all presentation, UI state, and user interactions. The Express backend handles all authorization constraints, Mongoose queries, and Groq API interactions.
 
 **AI Processing Pipeline**
-Prompts are enriched with system context on the Express backend before being dispatched to Gemini. Responses are formatted either as strict JSON (for roadmaps and debugging) or streamed directly back through the Express pipeline to the client (for chat).
+Prompts are enriched with system context on the Express backend before being dispatched to Groq. Responses are formatted either as strict JSON (for roadmaps and debugging) or streamed directly back through the Express pipeline to the client (for chat).
 
 **Authentication Layer**
 Better Auth natively manages the `user` and `session` collections directly in MongoDB, bypassing Mongoose to avoid schema collisions, ensuring a highly performant and secure identity lifecycle.
@@ -56,7 +56,7 @@ Better Auth natively manages the `user` and `session` collections directly in Mo
 **Chat pipeline:**
 1. User message posted to `/api/ai/chat`.
 2. The Express controller injects a strict IoT System Prompt.
-3. Gemini processes the query and generates a response stream.
+3. Groq processes the query and generates a response stream.
 4. Express pipes the chunks directly to the client via `Content-Type: text/event-stream`.
 5. The Next.js client natively renders the incoming stream to the UI.
 
@@ -70,7 +70,7 @@ Better Auth natively manages the `user` and `session` collections directly in Mo
 **Debugging pipeline:**
 1. User pastes a hardware log into the UI.
 2. The payload is sent to `/api/ai/debug`.
-3. Gemini analyzes the stack trace and generates a structured JSON fix.
+3. Groq analyzes the stack trace and generates a structured JSON fix.
 4. The client renders the specific root cause and code correction.
 
 ## 8. Project Structure
@@ -99,7 +99,7 @@ docs/               # Numbered Project Learning Path (01-11)
 - The user accesses tools (AI Mentor, Debugger, Learning Paths, Projects).
 - Client wrappers securely forward requests with HTTP-Only cookies to the Express backend.
 - The backend validates access via middleware and invokes the corresponding service.
-- The service interacts with MongoDB or Gemini, processes the result, and returns it to the client.
+- The service interacts with MongoDB or Groq, processes the result, and returns it to the client.
 - The client UI updates reactively using Framer Motion for polished transitions.
 
 ## 10. Installation
@@ -138,7 +138,7 @@ MONGODB_URI=
 BETTER_AUTH_SECRET=
 BETTER_AUTH_URL=http://localhost:5000
 CLIENT_URL=http://localhost:3000
-GEMINI_API_KEY=
+GROQ_API_KEY=
 ```
 
 **Frontend (`client/.env.local`)**
