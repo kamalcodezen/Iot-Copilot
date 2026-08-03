@@ -1,12 +1,10 @@
-"use server";
-
-import { serverFetch } from '../core/server';
+import { clientFetch } from './client-api';
 import { LearningPath, ApiResponse } from '@/types';
 
 export const getLearningPaths = async () => {
-  return await serverFetch<ApiResponse<LearningPath[]>>('/learning-paths');
+  return await clientFetch<ApiResponse<LearningPath[]>>('/learning-paths');
 };
 
 export const getLearningPath = async (id: string) => {
-  return await serverFetch<ApiResponse<LearningPath>>(`/learning-paths/${id}`);
+  return await clientFetch<ApiResponse<LearningPath>>(`/learning-paths/${id}`);
 };

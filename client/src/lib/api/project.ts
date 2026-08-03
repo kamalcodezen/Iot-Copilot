@@ -1,12 +1,11 @@
-"use server";
-
-import { serverFetch } from '../core/server';
+import { clientFetch } from './client-api';
 import { Project, ApiResponse } from '@/types';
 
 export const getProjects = async (params?: Record<string, string | number | boolean | undefined>) => {
-  return await serverFetch<ApiResponse<Project[]>>('/projects', { params });
+  const query = params ? `?${new URLSearchParams(params as any).toString()}` : '';
+  return await clientFetch<ApiResponse<Project[]>>(`/projects${query}`);
 };
 
 export const getProjectById = async (id: string) => {
-  return await serverFetch<ApiResponse<Project>>(`/projects/${id}`);
+  return await clientFetch<ApiResponse<Project>>(`/projects/${id}`);
 };

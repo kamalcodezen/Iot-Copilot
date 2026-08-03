@@ -1,12 +1,11 @@
-"use server";
-
-import { serverFetch } from '../core/server';
+import { clientFetch } from './client-api';
 import { Activity, ApiResponse, StatsData } from '@/types';
 
 export const getDashboardStats = async () => {
-  return await serverFetch<ApiResponse<StatsData>>('/activities/stats');
+  return await clientFetch<ApiResponse<StatsData>>('/activities/stats');
 };
 
 export const getActivities = async (params?: Record<string, string | number | boolean | undefined>) => {
-  return await serverFetch<ApiResponse<Activity[]>>('/activities', { params });
+  const query = params ? `?${new URLSearchParams(params as any).toString()}` : '';
+  return await clientFetch<ApiResponse<Activity[]>>(`/activities${query}`);
 };

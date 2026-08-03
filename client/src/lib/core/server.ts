@@ -52,9 +52,10 @@ export const serverFetch = async <T>(endpoint: string, options: RequestInit & { 
   });
 
   if (!response.ok) {
-    if (response.status === 401) {
-      redirect('/auth/login');
-    }
+    // Prevent redirect loop in Server Actions (cross-domain session drop)
+    // if (response.status === 401) {
+    //   redirect('/auth/login');
+    // }
     const errorBody = await response.text();
     let parsedBody;
     try {
