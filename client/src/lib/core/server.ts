@@ -1,4 +1,4 @@
-import { cookies } from 'next/headers';
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5000/api');
@@ -16,14 +16,13 @@ function buildUrl(endpoint: string, params?: Record<string, string | number | bo
   return url.toString();
 }
 
+// Forwards the browser's request headers as-is so the API server can resolve
+// the session with Better Auth. No cookies are parsed or named here.
 export const authHeaders = async (): Promise<Record<string, string>> => {
   try {
-    const cookieStore = await cookies();
-    const cookieString = cookieStore
-      .getAll()
-      .map((c) => `${c.name}=${c.value}`)
-      .join('; ');
-    return { Cookie: cookieString };
+    const headerStore = await headers();
+    const cookie = headerStore.get('cookie');
+    return cookie ? { Cookie: cookie } : {};
   } catch (error) {
     return {};
   }

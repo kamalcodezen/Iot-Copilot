@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 import { Menu, X, CircuitBoard, Bell } from 'lucide-react';
-import { useAuthStore } from '@/store/authStore';
+import { authClient } from '@/lib/auth-client';
 import { cn } from '@/utils/cn';
 import Avatar from '@/components/ui/Avatar';
 import NavbarUserMenu from './NavbarUserMenu';
@@ -53,20 +53,12 @@ const MagneticButton = ({ children, className }: { children: React.ReactNode; cl
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const fetchedRef = useRef(false);
-  const { isAuthenticated, user, logout, isLoggingOut, fetchMe } = useAuthStore();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { data: session } = authClient.useSession();
+  const user = session?.user ?? null;
+  const isAuthenticated = !!user;
   const router = useRouter();
   const pathname = usePathname();
-
-  useEffect(() => {
-    if (!fetchedRef.current) {
-      fetchedRef.current = true;
-      // Only fetch if we are not already authenticated
-      if (!isAuthenticated) {
-        fetchMe();
-      }
-    }
-  }, [fetchMe, isAuthenticated]);
 
   const isLanding = pathname === '/';
 
@@ -83,8 +75,12 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     setMobileOpen(false);
-    await logout();
-    router.push('/');
+    setIsLoggingOut(true);
+    try {
+      await authClient.signOut();
+    } finally {
+      router.push('/');
+    }
   };
 
   const isActive = (href: string) => {
@@ -175,7 +171,7 @@ export default function Navbar() {
                     </button>
                   </MagneticButton>
 
-                  <NavbarUserMenu user={user} isLoggingOut={isLoggingOut} onLogout={handleLogout} />
+                  <NavbarUserMenu user={{ name: user.name || 'User', email: user.email || '', image: user.image }} isLoggingOut={isLoggingOut} onLogout={handleLogout} />
                 </>
               ) : (
                 <>

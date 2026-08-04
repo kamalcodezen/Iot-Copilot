@@ -8,15 +8,17 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import IoTLoader from '@/components/ui/IoTLoader';
 import SectionHeader from '@/components/layout/SectionHeader';
-import { useAuthStore } from '@/store/authStore';
 import { authClient } from '@/lib/auth-client';
+import { SessionUser } from '@/lib/session';
 import { getErrorMessage } from '@/utils/errors';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 
 export default function SettingsPage() {
-  const { user, isLoading, isAuthenticated, logout, isLoggingOut, fetchMe } = useAuthStore();
+  const { data: session, isPending } = authClient.useSession();
+  const sessionUser = session?.user as SessionUser | undefined;
   const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   
   const [name, setName] = useState('');
   const [savingProfile, setSavingProfile] = useState(false);
@@ -26,11 +28,11 @@ export default function SettingsPage() {
   const [savingPassword, setSavingPassword] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) router.push('/auth/login');
-    if (user && !name) setName(user.name);
-  }, [isLoading, isAuthenticated, router, user, name]);
+    if (!isPending && !sessionUser) router.push('/auth/login');
+    if (sessionUser && !name) setName(sessionUser.name);
+  }, [isPending, sessionUser, router, name]);
 
-  if (isLoading || !user) return <div className="min-h-screen dashboard-bg flex items-center justify-center"><IoTLoader /></div>;
+  if (isPending || !sessionUser) return <div className="min-h-screen dashboard-bg flex items-center justify-center"><IoTLoader /></div>;
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,8 +45,8 @@ export default function SettingsPage() {
     try {
       const { error } = await authClient.updateUser({ name });
       if (error) throw error;
-      
-      await fetchMe();
+      const { data: fresh } = await authClient.getSession();
+      if (fresh?.user?.name) setName(fresh.user.name);
       toast.success('Profile updated successfully');
     } catch (error) {
       toast.error(getErrorMessage(error, 'Failed to update profile'));
@@ -85,8 +87,12 @@ export default function SettingsPage() {
   };
 
   const handleLogout = async () => {
-    await logout();
-    router.push('/');
+    setIsLoggingOut(true);
+    try {
+      await authClient.signOut();
+    } finally {
+      router.push('/');
+    }
   };
 
   return (
@@ -114,7 +120,7 @@ export default function SettingsPage() {
             />
             <Input 
               label="Email Address" 
-              value={user.email} 
+              value={sessionUser.email} 
               disabled 
             />
             

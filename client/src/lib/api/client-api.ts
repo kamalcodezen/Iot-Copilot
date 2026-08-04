@@ -10,10 +10,6 @@ export async function clientFetch<T>(endpoint: string, options?: RequestInit): P
     },
   });
   if (!response.ok) {
-    if (response.status === 401) {
-      const { useAuthStore } = await import('@/store/authStore');
-      useAuthStore.getState().setUser(null);
-    }
     const text = await response.text();
     let message = text || `Request failed: ${response.status}`;
     try {

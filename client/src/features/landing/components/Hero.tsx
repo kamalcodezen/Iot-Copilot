@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, Sparkles, Radio, Activity, Globe, Monitor, Gauge } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import Button from '@/components/ui/Button';
-import { useAuthStore } from '@/store/authStore';
+import { authClient } from '@/lib/auth-client';
 import HeroNetworkVisual from './HeroNetworkVisual';
 
 const stats = [
@@ -35,18 +35,10 @@ function StatCard({ icon: Icon, label, value, color, index }: { icon: LucideIcon
 }
 
 export default function Hero() {
-  const { isAuthenticated, isLoading, fetchMe } = useAuthStore();
-  const fetchedRef = useRef(false);
+  const { data: session, isPending } = authClient.useSession();
   const sectionRef = useRef<HTMLElement>(null);
 
-  useEffect(() => {
-    if (!fetchedRef.current) {
-      fetchedRef.current = true;
-      fetchMe();
-    }
-  }, [fetchMe]);
-
-  const getStartedHref = !isLoading && isAuthenticated ? '/dashboard' : '/auth/login';
+  const getStartedHref = !isPending && session ? '/dashboard' : '/auth/login';
 
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start start', 'end start'] });
   const heroY = useTransform(scrollYProgress, [0, 1], [0, 120]);

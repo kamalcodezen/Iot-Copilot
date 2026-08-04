@@ -1,39 +1,28 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, CircuitBoard } from 'lucide-react';
 import Sidebar from '@/components/layout/Sidebar';
 import MobileNav from '@/components/layout/MobileNav';
-import { useAuthStore } from '@/store/authStore';
+import { authClient } from '@/lib/auth-client';
 import { useUIStore } from '@/store/uiStore';
 import IoTLoader from '@/components/ui/IoTLoader';
 import { cn } from '@/utils/cn';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading, fetchMe, isLoggingOut } = useAuthStore();
+  const { data: session, isPending } = authClient.useSession();
   const { sidebarOpen } = useUIStore();
   const router = useRouter();
-  const fetchedRef = useRef(false);
 
   useEffect(() => {
-    if (!fetchedRef.current) {
-      fetchedRef.current = true;
-      // Only fetch if we are not already authenticated
-      if (!isAuthenticated) {
-        fetchMe();
-      }
-    }
-  }, [fetchMe, isAuthenticated]);
-
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated && !isLoggingOut) {
+    if (!isPending && !session) {
       router.push('/auth/login');
     }
-  }, [isLoading, isAuthenticated, isLoggingOut, router]);
+  }, [isPending, session, router]);
 
-  if (isLoading || (!isAuthenticated && !isLoggingOut)) {
+  if (isPending || !session) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center dashboard-bg relative">
         <div className="absolute top-0 inset-x-0 h-80 bg-gradient-to-b from-accent/[0.03] via-accent/[0.01] to-transparent pointer-events-none" />

@@ -5,8 +5,7 @@ import mongoSanitize from 'express-mongo-sanitize';
 import { env } from './config/env';
 import { errorHandler } from './middlewares/errorHandler';
 import { generalRateLimit } from './middlewares/rateLimit';
-import { getAuth, getAuthHandler } from "./config/auth";
-import { fromNodeHeaders } from 'better-auth/node';
+import { getAuthHandler } from "./config/auth";
 import { getDBStatus } from './config/db';
 import { logger } from './utils/logger';
 
@@ -75,22 +74,6 @@ app.use('/api/learning-paths', learningPathRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/community', communityRoutes);
 app.use('/api/admin', adminRoutes);
-
-app.all('/api/auth/me', async (req: Request, res: Response) => {
-  try {
-    const auth = getAuth();
-    const session = await auth.api.getSession({
-      headers: fromNodeHeaders(req.headers),
-    });
-    if (!session) {
-      res.status(401).json({ success: false, message: 'Not authenticated' });
-      return;
-    }
-    res.json({ success: true, data: session.user });
-  } catch {
-    res.status(401).json({ success: false, message: 'Not authenticated' });
-  }
-});
 
 app.use('/api/auth', betterAuthMiddleware);
 

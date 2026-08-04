@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CircuitBoard, X, User, Settings, LogOut, Signal } from 'lucide-react';
-import { User as UserType } from '@/types';
 import Avatar from '@/components/ui/Avatar';
 import { cn } from '@/utils/cn';
 import { NavLink } from './nav-links';
@@ -14,7 +13,7 @@ import { stopLenis, startLenis } from '@/lib/lenis';
 interface MobileSidebarProps {
   open: boolean;
   isAuthenticated: boolean;
-  user: UserType | null;
+  user: { name: string; email: string } | null;
   isLoggingOut: boolean;
   onClose: () => void;
   onLogout: () => void;

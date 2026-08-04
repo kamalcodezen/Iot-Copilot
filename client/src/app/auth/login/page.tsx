@@ -1,14 +1,15 @@
 'use client';
 
-import { useState, Suspense, useEffect, useRef } from 'react';
+import { useState, Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Eye, EyeOff, ChromeIcon, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { loginSchema } from '@/utils/validation';
-import { useAuthStore } from '@/store/authStore';
-import { getAuthError, getErrorMessage } from '@/utils/errors';
+import { authClient } from '@/lib/auth-client';
+import { SessionUser } from '@/lib/session';
+import { getAuthError } from '@/utils/errors';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import AuthShell from '@/components/auth/AuthShell';
@@ -31,24 +32,15 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [apiError, setApiError] = useState('');
-  const [socialLoading, setSocialLoading] = useState(false);
-  const { isAuthenticated, isLoading, fetchMe, login, signInWithGoogle } = useAuthStore();
+  const { data: session, isPending } = authClient.useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const fetchedRef = useRef(false);
 
   useEffect(() => {
-    if (!fetchedRef.current) {
-      fetchedRef.current = true;
-      fetchMe();
-    }
-  }, [fetchMe]);
-
-  useEffect(() => {
-    if (!isLoading && isAuthenticated) {
+    if (!isPending && session) {
       router.push(searchParams.get('redirect') || '/dashboard');
     }
-  }, [isLoading, isAuthenticated, router, searchParams]);
+  }, [isPending, session, router, searchParams]);
 
   const {
     register,
@@ -58,7 +50,7 @@ function LoginForm() {
     resolver: zodResolver(loginSchema),
   });
 
-  if (!isLoading && isAuthenticated) {
+  if (!isPending && session) {
     return (
       <div className="min-h-screen flex items-center justify-center dashboard-bg">
         <Spinner size="lg" />
@@ -69,26 +61,15 @@ function LoginForm() {
   const onSubmit = async (data: LoginForm) => {
     try {
       setApiError('');
-      const user = await login(data.email, data.password);
+      const { data: result, error } = await authClient.signIn.email({ email: data.email, password: data.password });
+      if (error) throw error;
+      const sessionUser = result?.user as SessionUser | undefined;
       toast.success('Welcome back!');
-      router.push(user.role === 'admin' ? '/admin' : (searchParams.get('redirect') || '/'));
+      router.push(sessionUser?.role === 'admin' ? '/admin' : (searchParams.get('redirect') || '/'));
     } catch (error) {
       const message = getLoginErrorMessage(error);
       setApiError(message);
       toast.error(message);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    try {
-      setSocialLoading(true);
-      setApiError('');
-      await signInWithGoogle();
-    } catch (error) {
-      const message = getErrorMessage(error, 'Google sign-in failed');
-      setApiError(message);
-      toast.error(message);
-      setSocialLoading(false);
     }
   };
 
@@ -153,30 +134,6 @@ function LoginForm() {
             <Button type="submit" className="w-full" isLoading={isSubmitting}>
               Sign In <ArrowRight size={15} className="ml-1.5" />
             </Button>
-
-            {/* TODO: Re-enable Google OAuth after fixing the redirect_uri_mismatch */}
-            {/* Pending: Verify Better Auth callback URL and Google Cloud Console OAuth configuration. */}
-            {/* 
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border-default" />
-              </div>
-              <div className="relative flex justify-center text-xs">
-                <span className="bg-bg-elevated px-3 font-semibold text-text-muted">or continue with</span>
-              </div>
-            </div>
-
-            <Button
-              type="button"
-              variant="secondary"
-              className="w-full"
-              isLoading={socialLoading}
-              onClick={handleGoogleSignIn}
-            >
-              <ChromeIcon size={15} className="mr-2" />
-              Google
-            </Button>
-            */}
           </form>
     </AuthShell>
   );

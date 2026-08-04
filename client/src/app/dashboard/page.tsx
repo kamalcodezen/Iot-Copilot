@@ -11,7 +11,7 @@ import RecentActivity from '@/features/dashboard/components/RecentActivity';
 import AISuggestions, { AISuggestion } from '@/features/dashboard/components/AISuggestions';
 import ProjectProgress from '@/features/dashboard/components/ProjectProgress';
 import QuickActions from '@/features/dashboard/components/QuickActions';
-import { useAuthStore } from '@/store/authStore';
+import { authClient } from '@/lib/auth-client';
 import { getActivities, getDashboardStats as getActivityStats } from '@/lib/api/dashboard';
 import { getProjects } from '@/lib/api/project';
 import { clientFetch } from '@/lib/api/client-api';
@@ -72,7 +72,7 @@ function DashboardSkeleton() {
 }
 
 export default function DashboardPage() {
-  const { user } = useAuthStore();
+  const { data: session } = authClient.useSession();
   const [stats, setStats] = useState<StatsData | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -166,7 +166,7 @@ export default function DashboardPage() {
       >
         <div className="min-w-0">
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-text-primary">
-            Welcome back, {user?.name?.split(' ')[0] || 'Engineer'}
+            Welcome back, {session?.user?.name?.split(' ')[0] || 'Engineer'}
           </h1>
           <p className="text-sm text-text-secondary mt-1.5">Here&apos;s your IoT learning overview</p>
         </div>

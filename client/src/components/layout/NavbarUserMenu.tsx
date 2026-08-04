@@ -4,12 +4,11 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, LayoutDashboard, User, Settings, LogOut } from 'lucide-react';
-import { User as UserType } from '@/types';
 import Avatar from '@/components/ui/Avatar';
 import { cn } from '@/utils/cn';
 
 interface NavbarUserMenuProps {
-  user: UserType;
+  user: { name: string; email: string; image?: string | null };
   isLoggingOut: boolean;
   onLogout: () => void;
 }
@@ -42,7 +41,7 @@ export default function NavbarUserMenu({ user, isLoggingOut, onLogout }: NavbarU
         aria-label="User menu"
         aria-expanded={open}
       >
-        <Avatar name={user.name || 'User'} size="sm" status="online" className="shadow-[0_0_10px_rgba(20,184,166,0.3)]" />
+        <Avatar name={user.name || 'User'} src={user.image || ''} size="sm" status="online" className="shadow-[0_0_10px_rgba(20,184,166,0.3)]" />
         <div className="text-left min-w-0 max-w-[100px] hidden xl:block">
           <p className="text-sm font-bold text-text-primary truncate">{user.name || 'User'}</p>
         </div>

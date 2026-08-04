@@ -1,14 +1,5 @@
 import { z } from 'zod';
-import { emailSchema, passwordSchema, nameSchema, skillLevelEnum } from './shared';
-
-export const forgotPasswordSchema = z.object({
-  email: emailSchema,
-});
-
-export const resetPasswordSchema = z.object({
-  token: z.string().min(1, 'Token is required'),
-  password: passwordSchema,
-});
+import { nameSchema, skillLevelEnum } from './shared';
 
 export const updateRoleSchema = z.object({
   role: z.enum(['user', 'admin']),

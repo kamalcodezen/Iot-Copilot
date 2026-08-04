@@ -7,21 +7,23 @@ import Badge from '@/components/ui/Badge';
 import Avatar from '@/components/ui/Avatar';
 import IoTLoader from '@/components/ui/IoTLoader';
 import SectionHeader from '@/components/layout/SectionHeader';
-import { useAuthStore } from '@/store/authStore';
+import { authClient } from '@/lib/auth-client';
+import { mapSessionUser } from '@/lib/session';
 import { formatDate } from '@/utils/date';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 export default function ProfilePage() {
-  const { user, isLoading, isAuthenticated } = useAuthStore();
+  const { data: session, isPending } = authClient.useSession();
+  const user = session?.user ? mapSessionUser(session.user) : null;
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) router.push('/auth/login');
-  }, [isLoading, isAuthenticated, router]);
+    if (!isPending && !session) router.push('/auth/login');
+  }, [isPending, session, router]);
 
-  if (isLoading || !user) return <div className="min-h-screen dashboard-bg flex items-center justify-center"><IoTLoader /></div>;
+  if (isPending || !user) return <div className="min-h-screen dashboard-bg flex items-center justify-center"><IoTLoader /></div>;
 
   return (
     <div className="min-h-screen dashboard-bg space-y-6 sm:space-y-8 max-w-4xl mx-auto px-4 pb-24 sm:pb-20 lg:pb-10 pt-20">

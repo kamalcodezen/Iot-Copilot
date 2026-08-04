@@ -1,15 +1,16 @@
 'use client';
 
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Eye, EyeOff, ChromeIcon, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { registerSchema } from '@/utils/validation';
-import { useAuthStore } from '@/store/authStore';
-import { getAuthError, getErrorMessage } from '@/utils/errors';
+import { authClient } from '@/lib/auth-client';
+import { SessionUser } from '@/lib/session';
+import { getAuthError } from '@/utils/errors';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import AuthShell from '@/components/auth/AuthShell';
@@ -44,23 +45,14 @@ export default function RegisterPage() {
   const [passwordValue, setPasswordValue] = useState('');
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [apiError, setApiError] = useState('');
-  const [socialLoading, setSocialLoading] = useState(false);
-  const { isAuthenticated, isLoading, fetchMe, register: registerUser, signInWithGoogle } = useAuthStore();
+  const { data: session, isPending } = authClient.useSession();
   const router = useRouter();
-  const fetchedRef = useRef(false);
 
   useEffect(() => {
-    if (!fetchedRef.current) {
-      fetchedRef.current = true;
-      fetchMe();
-    }
-  }, [fetchMe]);
-
-  useEffect(() => {
-    if (!isLoading && isAuthenticated) {
+    if (!isPending && session) {
       router.replace('/');
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isPending, session, router]);
 
   const {
     register,
@@ -74,7 +66,7 @@ export default function RegisterPage() {
   const watchedPassword = watch('password');
   const strength = useMemo(() => getPasswordStrength(watchedPassword || ''), [watchedPassword]);
 
-  if (!isLoading && isAuthenticated) {
+  if (!isPending && session) {
     return (
       <div className="min-h-screen flex items-center justify-center dashboard-bg">
         <Spinner size="lg" />
@@ -89,26 +81,15 @@ export default function RegisterPage() {
     }
     try {
       setApiError('');
-      const user = await registerUser(data.name, data.email, data.password);
+      const { data: result, error } = await authClient.signUp.email({ name: data.name, email: data.email, password: data.password });
+      if (error) throw error;
+      const sessionUser = result?.user as SessionUser | undefined;
       toast.success('Account created! Welcome to IoT Copilot.');
-      router.push(user.role === 'admin' ? '/admin' : '/');
+      router.push(sessionUser?.role === 'admin' ? '/admin' : '/');
     } catch (error) {
       const message = getRegisterErrorMessage(error);
       setApiError(message);
       toast.error(message);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    try {
-      setSocialLoading(true);
-      setApiError('');
-      await signInWithGoogle();
-    } catch (error) {
-      const message = getErrorMessage(error, 'Google sign-in failed');
-      setApiError(message);
-      toast.error(message);
-      setSocialLoading(false);
     }
   };
 
@@ -201,30 +182,6 @@ export default function RegisterPage() {
             <Button type="submit" className="w-full" isLoading={isSubmitting}>
               Create Account <ArrowRight size={15} className="ml-1.5" />
             </Button>
-
-            {/* TODO: Re-enable Google OAuth after fixing the redirect_uri_mismatch */}
-            {/* Pending: Verify Better Auth callback URL and Google Cloud Console OAuth configuration. */}
-            {/*
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border-default" />
-              </div>
-              <div className="relative flex justify-center text-xs">
-                <span className="bg-bg-elevated px-3 font-semibold text-text-muted">or sign up with</span>
-              </div>
-            </div>
-
-            <Button
-              type="button"
-              variant="secondary"
-              className="w-full"
-              isLoading={socialLoading}
-              onClick={handleGoogleSignIn}
-            >
-              <ChromeIcon size={15} className="mr-2" />
-              Google
-            </Button>
-            */}
           </form>
     </AuthShell>
   );

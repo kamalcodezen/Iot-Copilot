@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,7 +10,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { useUIStore } from '@/store/uiStore';
-import { useAuthStore } from '@/store/authStore';
+import { authClient } from '@/lib/auth-client';
+import { SessionUser } from '@/lib/session';
 import { useRouter } from 'next/navigation';
 
 const navItems = [
@@ -38,14 +39,20 @@ const DESKTOP_COLLAPSED_WIDTH = 0;
 export default function Sidebar() {
   const pathname = usePathname();
   const { sidebarOpen, toggleSidebar, setSidebarOpen } = useUIStore();
-  const { user, logout, isLoggingOut } = useAuthStore();
+  const { data: session } = authClient.useSession();
+  const user = session?.user as SessionUser | undefined;
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const router = useRouter();
   const sidebarRef = useRef<HTMLElement>(null);
 
   const handleLogout = async () => {
     setSidebarOpen(false);
-    await logout();
-    router.push('/');
+    setIsLoggingOut(true);
+    try {
+      await authClient.signOut();
+    } finally {
+      router.push('/');
+    }
   };
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
