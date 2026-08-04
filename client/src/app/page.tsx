@@ -1,3 +1,4 @@
+import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import Hero from '@/features/landing/components/Hero';
 import Statistics from '@/features/landing/components/Statistics';
@@ -17,6 +18,7 @@ import CTA from '@/features/landing/components/CTA';
 export default function LandingPage() {
   return (
     <>
+      <Navbar />
       <main className="min-h-screen">
         <Hero />
         <Statistics />
