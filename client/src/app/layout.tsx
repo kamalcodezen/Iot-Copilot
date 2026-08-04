@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import ToastProvider from '@/components/ui/Toast';
+import Navbar from '@/components/layout/Navbar';
 import AIAssistant from '@/components/ai/AIAssistant';
 import SmoothScroll from '@/components/layout/SmoothScroll';
 import NextTopLoader from 'nextjs-toploader';
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AOSInit />
         <SmoothScroll />
         <ToastProvider />
+        <Navbar />
         {children}
         <AIAssistant />
       </body>
