@@ -1,6 +1,6 @@
 # IoT Copilot
 
-**IoT Copilot: a full-stack AI engineering suite built as a decoupled Next.js and Express architecture.**
+**AI-powered IoT learning and project management platform that unifies AI assistance, personalized learning, project tracking, secure authentication, and an intuitive dashboard.**
 
 ## 1. Project Title & Tagline
 **IoT Copilot**: An intelligent, AI-powered companion designed to simplify the design, learning, and deployment of Industrial Internet of Things (IIoT) systems by unifying hardware schematics, cloud integrations, and software debugging into a single platform.
