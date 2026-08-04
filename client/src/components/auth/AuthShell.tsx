@@ -7,18 +7,20 @@ interface AuthShellProps {
   apiError: string;
   children: React.ReactNode;
   footer: React.ReactNode;
+  flipDirection?: 'flip-left' | 'flip-right';
 }
 
 // Shared layout for the auth pages: full-screen background with the radial
 // glow, the branded card with logo and title, the inline API error banner,
 // and the footer line under the form. The card flips in once on page open.
-export default function AuthShell({ title, subtitle, apiError, children, footer }: AuthShellProps) {
+// Login and register use opposite flip directions so the pages mirror each other.
+export default function AuthShell({ title, subtitle, apiError, children, footer, flipDirection = 'flip-left' }: AuthShellProps) {
   return (
     <div className="min-h-screen flex items-center justify-center dashboard-bg relative pt-20">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(95,161,179,0.06)_0%,transparent_60%)]" />
 
       <div
-        data-aos="flip-left"
+        data-aos={flipDirection}
         data-aos-duration="900"
         data-aos-easing="ease-out-cubic"
         className="relative z-10 w-full max-w-md px-4"

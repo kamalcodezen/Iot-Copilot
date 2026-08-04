@@ -98,6 +98,7 @@ export default function RegisterPage() {
       title="Get Started"
       subtitle="Create your account and start learning IoT"
       apiError={apiError}
+      flipDirection="flip-right"
       footer={
         <>
           Already have an account?{' '}
