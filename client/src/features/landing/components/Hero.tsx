@@ -68,7 +68,7 @@ export default function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold text-text-primary tracking-tight leading-[1.04] mb-5"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-text-primary tracking-tight leading-[1.04] mb-5"
             >
               Intelligence for
               <br />
@@ -79,7 +79,7 @@ export default function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="text-base sm:text-lg md:text-xl text-text-secondary max-w-xl mb-8 leading-relaxed"
+              className="text-base sm:text-md md:text-xl text-text-secondary max-w-xl mb-8 leading-relaxed"
             >
               Design, deploy and monitor industrial IoT systems at scale.
               AI-powered analytics, predictive maintenance, and real-time device management — unified.
