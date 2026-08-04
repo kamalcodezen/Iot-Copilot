@@ -1,17 +1,17 @@
 import { Response } from 'express';
+import mongoose from 'mongoose';
 import Project from '../models/Project';
 import Activity from '../models/Activity';
 import { AuthRequest } from '../types';
 import { asyncHandler } from '../middlewares/asyncHandler';
 import { sendData, sendMessage, sendPaginated } from '../utils/response';
 import { mongoIdParams, paginationSchema } from '../validators/shared';
-import { getAuth } from '../config/auth';
-import { fromNodeHeaders } from 'better-auth/node';
 import {
   getUserById,
   findUsers,
   countUsers,
   updateUserRoleById,
+  deleteUserById,
 } from '../services/user';
 
 export const getUsers = asyncHandler(async (req: AuthRequest, res: Response) => {
@@ -43,16 +43,14 @@ export const deleteUser = asyncHandler(async (req: AuthRequest, res: Response) =
     return;
   }
 
-  // Better Auth removes the user and all of their sessions and accounts.
-  const auth = getAuth();
-  await auth.api.removeUser({
-    body: { userId: id },
-    headers: fromNodeHeaders(req.headers),
-  });
+  await deleteUserById(id);
 
-  // Remove everything the deleted user owned.
+  // Remove everything the deleted user owned, including better-auth's
+  // session and account records for that user.
   await Project.deleteMany({ userId: id });
   await Activity.deleteMany({ userId: id });
+  await mongoose.connection.db?.collection('session').deleteMany({ userId: id });
+  await mongoose.connection.db?.collection('account').deleteMany({ userId: id });
 
   sendMessage(res, 'User deleted');
 });

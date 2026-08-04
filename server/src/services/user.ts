@@ -26,8 +26,7 @@ function getUserCollection() {
 export async function getUserById(id: string) {
   const col = getUserCollection();
   if (!col) return null;
-  if (!mongoose.isValidObjectId(id)) return null;
-  return col.findOne({ _id: new mongoose.Types.ObjectId(id) });
+  return col.findOne({ id });
 }
 
 export async function getPublicUserById(id: string): Promise<PublicUser | null> {
@@ -79,6 +78,10 @@ export async function updateUserRoleById(id: string, role: string) {
     { $set: { role } },
     { returnDocument: 'after' }
   );
+}
+
+export async function deleteUserById(id: string) {
+  await getUserCollection()?.deleteOne({ id });
 }
 
 export async function updateUserProfile(id: string, profile: UserProfile) {
