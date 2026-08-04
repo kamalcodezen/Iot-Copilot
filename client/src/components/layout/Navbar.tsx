@@ -73,14 +73,16 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isLanding]);
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     setMobileOpen(false);
     setIsLoggingOut(true);
-    try {
-      await authClient.signOut();
-    } finally {
-      router.push('/');
-    }
+    authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.push('/');
+        },
+      },
+    });
   };
 
   const isActive = (href: string) => {

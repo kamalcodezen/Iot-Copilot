@@ -86,13 +86,15 @@ export default function SettingsPage() {
     }
   };
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     setIsLoggingOut(true);
-    try {
-      await authClient.signOut();
-    } finally {
-      router.push('/');
-    }
+    authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.push('/');
+        },
+      },
+    });
   };
 
   return (

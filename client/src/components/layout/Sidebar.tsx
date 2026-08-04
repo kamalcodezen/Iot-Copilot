@@ -45,14 +45,16 @@ export default function Sidebar() {
   const router = useRouter();
   const sidebarRef = useRef<HTMLElement>(null);
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     setSidebarOpen(false);
     setIsLoggingOut(true);
-    try {
-      await authClient.signOut();
-    } finally {
-      router.push('/');
-    }
+    authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.push('/');
+        },
+      },
+    });
   };
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
