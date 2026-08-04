@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import { CircuitBoard } from 'lucide-react';
 
 interface AuthShellProps {
@@ -12,15 +11,16 @@ interface AuthShellProps {
 
 // Shared layout for the auth pages: full-screen background with the radial
 // glow, the branded card with logo and title, the inline API error banner,
-// and the footer line under the form.
+// and the footer line under the form. The card flips in once on page open.
 export default function AuthShell({ title, subtitle, apiError, children, footer }: AuthShellProps) {
   return (
     <div className="min-h-screen flex items-center justify-center dashboard-bg relative pt-20">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(95,161,179,0.06)_0%,transparent_60%)]" />
 
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
+      <div
+        data-aos="flip-left"
+        data-aos-duration="900"
+        data-aos-easing="ease-out-cubic"
         className="relative z-10 w-full max-w-md px-4"
       >
         <div className="bg-bg-elevated border border-border-default rounded-2xl p-7 sm:p-8 shadow-elevation-high">
@@ -47,7 +47,7 @@ export default function AuthShell({ title, subtitle, apiError, children, footer 
 
           <p className="text-center text-sm font-semibold text-text-secondary mt-6">{footer}</p>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

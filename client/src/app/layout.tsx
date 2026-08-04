@@ -5,6 +5,8 @@ import Navbar from '@/components/layout/Navbar';
 import AIAssistant from '@/components/ai/AIAssistant';
 import SmoothScroll from '@/components/layout/SmoothScroll';
 import NextTopLoader from 'nextjs-toploader';
+import AOSInit from '@/components/AOSInit';
+import 'aos/dist/aos.css';
 import './globals.css';
 
 const inter = Inter({
@@ -30,6 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={inter.variable}>
       <body className={`${jetbrainsMono.variable} font-sans antialiased dashboard-bg text-text-primary`}>
         <NextTopLoader color="var(--color-accent)" showSpinner={false} shadow="0 0 10px var(--color-accent),0 0 5px var(--color-accent)" />
+        <AOSInit />
         <SmoothScroll />
         <ToastProvider />
         <Navbar />
