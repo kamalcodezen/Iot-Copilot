@@ -140,16 +140,16 @@ export default function Navbar() {
         className={cn(
           'fixed left-0 right-0 z-50 transition-all duration-500 ease-out',
           scrolled || !isLanding
-            ? 'top-4 mx-4 lg:mx-auto max-w-6xl rounded-full bg-teal-950/40 backdrop-blur-2xl border border-teal-500/20 shadow-[0_0_30px_rgba(20,184,166,0.15)]'
+            ? 'top-0 lg:mx-auto max-w-7xl  sm:px-6  bg-teal-950/40 backdrop-blur-2xl border border-teal-500/20 shadow-[0_0_30px_rgba(20,184,166,0.15)]'
             : 'top-0 bg-transparent'
         )}
       >
-        <div className={cn('mx-auto transition-all duration-500', scrolled || !isLanding ? 'px-3 sm:px-4' : 'max-w-7xl px-4 sm:px-6 lg:px-8')}>
+        <div className={cn('mx-auto transition-all duration-500', scrolled || !isLanding ? 'px-1' : 'max-w-7xl px-4 sm:px-6')}>
           <div className={cn('flex items-center justify-between transition-all duration-500', scrolled || !isLanding ? 'h-16' : 'h-24')}>
 
             {/* Logo */}
             <Link href="/" className="flex items-center gap-3 group shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-xl pl-2">
-              <div className="relative flex items-center justify-center h-10 w-10 rounded-2xl bg-gradient-to-br from-teal-500/20 to-accent/20 border border-accent/30 shadow-[0_0_15px_rgba(20,184,166,0.2)] group-hover:shadow-[0_0_25px_rgba(20,184,166,0.4)] transition-all duration-300">
+              <div className="relative flex items-center justify-center h-10 w-10 rounded-md bg-gradient-to-br from-teal-500/20 to-accent/20 border border-accent/30 shadow-[0_0_15px_rgba(20,184,166,0.2)] group-hover:shadow-[0_0_25px_rgba(20,184,166,0.4)] transition-all duration-300">
                 <CircuitBoard className="w-5 h-5 text-accent group-hover:scale-110 transition-transform duration-300" />
               </div>
               <span className="text-xl font-extrabold tracking-tight">
